@@ -7,10 +7,9 @@ Shader "Custom/Cube Shader"
 	{
 		_SpriteTex ("RGBA Texture Image", 2D) = "white" {}
 		_Size ("Size", Range(0, 30)) = 0.5
-		_IndexPos ("IndexPos", Vector) = (15.0,15.0,15.0,15.0)
-		_X("X",Float) = 15.0
-		_Y("Y",Float) = 15.0
-		_Z("Z",Float) = 15.0
+		_X("X",Range(0,1)) = 0.5
+		_Y("Y",Range(0,1)) = 0.5
+		_Z("Z",Range(0,1)) = 0.5
 		_BrushSize("BrushSize",Float) = 0.05
 		_MinD0("MinD0",Float) = 0
 		_MaxD0("MaxD0",Float) = 0
@@ -106,15 +105,16 @@ Shader "Custom/Cube Shader"
 				float maxRY;
 				float maxRZ;
 
-				//*******************
-				// DIMENSIONS
-				//*******************
+				//**************************
+				// CUTTING PLANE COORDINATES
+				//**************************
+				float4 p0Temp; // temporary plane coordinate 0
+				float4 p1Temp; // temporary plane coordinate 1
+				float4 p2Temp; // temporary plane coordinate 2
 
-				float _MinD0;
-				float _MaxD0;
-				float _MinD1;
-				float _MaxD1;
-				float _Alpha;
+				float3 p0;
+				float3 p1;
+				float3 p2;
 
 				float4x4 _VP;
 				Texture2D _SpriteTex;
@@ -123,6 +123,13 @@ Shader "Custom/Cube Shader"
 				//*********************************
 				// helper functions
 				//*********************************
+				
+				//returns distance from point to plane (p0,p1,p2)
+				float distanceToPlane(float3 vertexPosition)
+				{
+				//bbach: TODO
+					return distance(p0,vertexPosition);
+				}
 
 				float normaliseValue(float value, float i0, float i1, float j0, float j1)
 				{
@@ -181,22 +188,17 @@ Shader "Custom/Cube Shader"
 					
 					// calculates screen position for vertex
 					output.pos =  mul(unity_ObjectToWorld, v.position);
-
-					//output.isBrushed = 0.0;
-					//for(int i=0; i< 3; i++)
-					//{
-					//_X_Array[0] = 0.75; //, 0.2, 0.3};
-
-					//bool brushTested = brushTest(v,_X,_Y,_Z);
-
-					//if(brushTested) 
-					//{
-					//	output.isBrushed = 1.0;
-					//	//output.pos.x += 1.0;
-					//}
 					
+					float4 colorV = v.color;
+					// test the distance of the vertex to the plane
+					p0 = float3(p0Temp.x,p0Temp.y,p0Temp.z);
+					p1 = float3(p1Temp.x,p1Temp.y,p1Temp.z);
+					p2 = float3(p2Temp.x,p2Temp.y,p2Temp.z);
 
-					output.col = v.color;
+					if(distanceToPlane(v.position)>0.2)
+					colorV.a = 0;
+
+					output.col = colorV;
 					//if(v.position.z > 0.5) output.col = float4(1.0,0.0,0.0,1.0);
 					return output;
 				}
@@ -396,7 +398,7 @@ Shader "Custom/Cube Shader"
 				//return colorReturn; //ambient+diffuse*saturate(dot(Light,Norm));
 				float dt = (dx -0.5) * (dx-0.5) + (dy-0.5) * (dy-0.5);
 
-				return float4(input.col.x-dx/2,input.col.y-dx/2,input.col.z-dx/2,1.0);
+				return float4(input.col.x-dx/2,input.col.y-dx/2,input.col.z-dx/2,input.col.w);
 				}
 			
 
