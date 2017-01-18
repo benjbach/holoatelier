@@ -18,77 +18,31 @@ public class Visualisations : MonoBehaviour
 
     DataObject dataObject;
     GameObject MenuDimensions;
+    View scatterplot3D;
 
     // Use this for initialization
     void Start()
     {
-
+        //loads a dataset
         dataObject = new DataObject(dataFile.text);
-        //GameObject linkedview = createSingleView(dataObject, 2, 3, 4,0, MeshTopology.Lines,linesGraphMaterial);
-        //GameObject pointView = createSingleView(dataObject, 2, 3, 4, -1, MeshTopology.Points, pointCloudMaterial);
-
-        //GameObject[] Views1D = new GameObject[dataObject.Identifiers.Length];
-
-        //for (int i = 0; i < dataObject.Identifiers.Length; i++)
-        //{
-        //    Views1D[i] = createSingle1DView(dataObject, i, 10, true, 0.1f);
-        //    Views1D[i].transform.position = new Vector3(i * 1.5f, 1f, 0f);
-        //}
-
-        //GameObject[] Views1DV = new GameObject[dataObject.Identifiers.Length];
-
-        //for (int i = 0; i < dataObject.Identifiers.Length; i++)
-        //{
-        //    Views1DV[i] = createSingle1DView(dataObject, i, 10, true, 0.1f);
-        //    Views1DV[i].transform.position = new Vector3(-1f, -i * 1.5f, 0f);
-        //    Views1DV[i].transform.Rotate(0f, 0f, 90f);
-        //}
-
 
 
         // Cubix
-
         float[] coloredData = dataObject.getDimension(7);
         Color[] cd = Colors.mapDiscreteColor(coloredData); 
 
-        View v;
         GameObject view = createSingle2DView(
             dataObject, // data points 
             1,2,3, 
             -1, // always leave -1 
             MeshTopology.Points, 
             pointCloudMaterial, 
-            out v);
+            out scatterplot3D);
 
-        v.setColors(cd);
+        scatterplot3D.setColors(cd);
                     
 
-        // createSPLOM2D(dataObject, 0, MeshTopology.Points, pointCloudMaterial, 1.5f);
-        //createSPLOM2D(dataObject, 0, MeshTopology.Lines, linesGraphMaterial, 1.5f);
-
-       // DisplayMenu dm = new DisplayMenu(dataObject.Identifiers);
-       // dm.createSnaxes(0.1f);
-
-        //createSingleView(dataObject, 2, 3, 4, MeshTopology.Points);
-        //View v;
-        //createSingle2DView(dataObject, 2, 3, 4, 0, MeshTopology.Points, pointCloudMaterial, out v);
-        //v.mapColorContinuous(dataObject.getDimension(0), Color.black, Color.red);
-        //createSingle2DView(dataObject, 2, 3, 1, 0, MeshTopology.Lines, linesGraphMaterial);
-
-            
-        //createSPLOM3D(dataObject, -1, MeshTopology.Points, pointCloudMaterial, 1.5f);
-        //createSPLOM3D(dataObject, 0, MeshTopology.Lines, linesGraphMaterial, 1.5f);
-
-        //GameObject viewX = createSingleView(dataObject, 0, 1, 0, MeshTopology.Points);
-        //MenuDimensions = createMenu(dataObject);
-
-        //float[] prices = dataObject.GetCol(dataObject.DataArray, dataObject.dimensionToIndex("Price"));
-        //foreach (var item in prices)
-        //{
-        //    Debug.Log(item);
-        //}
-        //SetViewPosition(ref MenuDimensions, new Vector3(-3f, 2f, 1f));
-        //MenuDimensions.transform.Translate(-1f, 0f, 0f);
+     
         
     }
     /// <summary>
@@ -431,34 +385,42 @@ public class Visualisations : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            //empty RaycastHit object which raycast puts the hit details into
-            RaycastHit hit;
-            //ray shooting out of the camera from where the mouse is
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        //BBACH: TODO MAP PLANE POSITIONS
+        //Communication with the Cube Shader: sets the p0,p1,p2 points of the plane
+        pointCloudMaterial.SetVector("p0Temp", new Vector4());
+        pointCloudMaterial.SetVector("p1Temp", new Vector4());
+        pointCloudMaterial.SetVector("p2Temp", new Vector4());
 
-            if (Physics.Raycast(ray, out hit))
-            {
-                //print out the name if the raycast hits something
-                int k = (dataObject.dimensionToIndex(hit.transform.name));
 
-                if (dimension1 < 0) dimension1 = k;
-                if (dimension2 < 0 && dimension1 != k) dimension2 = k;
 
-                if (dimension1 > 0 && dimension2 > 0)
-                {
-                    View v;
-                    createSingle2DView(dataObject, dimension1, dimension2, -1, -1, MeshTopology.Points, pointCloudMaterial, out v);
-                }
+        //if (Input.GetMouseButtonDown(0))
+        //{
+        //    //empty RaycastHit object which raycast puts the hit details into
+        //    RaycastHit hit;
+        //    //ray shooting out of the camera from where the mouse is
+        //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-            }
-        }
-        if(Input.GetMouseButtonDown(1))
-        {
-            dimension1 = -1;
-            dimension2 = -1;
-        }
+        //    if (Physics.Raycast(ray, out hit))
+        //    {
+        //        //print out the name if the raycast hits something
+        //        int k = (dataObject.dimensionToIndex(hit.transform.name));
+
+        //        if (dimension1 < 0) dimension1 = k;
+        //        if (dimension2 < 0 && dimension1 != k) dimension2 = k;
+
+        //        if (dimension1 > 0 && dimension2 > 0)
+        //        {
+        //            View v;
+        //            createSingle2DView(dataObject, dimension1, dimension2, -1, -1, MeshTopology.Points, pointCloudMaterial, out v);
+        //        }
+
+        //    }
+        //}
+        //if(Input.GetMouseButtonDown(1))
+        //{
+        //    dimension1 = -1;
+        //    dimension2 = -1;
+        //}
 
 
     }
