@@ -179,6 +179,7 @@ Shader "Custom/Cube Shader"
 				{
 					GS_INPUT output = (GS_INPUT)0;
 					
+					// calculates screen position for vertex
 					output.pos =  mul(unity_ObjectToWorld, v.position);
 
 					//output.isBrushed = 0.0;
