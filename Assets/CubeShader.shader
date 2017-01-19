@@ -100,9 +100,13 @@ Shader "Custom/Cube Shader"
 				float4 p2Temp; // temporary plane coordinate 2
 				float operationRadius; // distance that operation affects
 
-				float3 p0 = new float3(0f,0f,0f);
-				float3 p1 = new float3(0f,0f,0f);;
-				float3 p2 = new float3(0f,0f,0f);;
+				// float3 p0 = new float3(0f,0f,0f);
+				// float3 p1 = new float3(0f,0f,0f);
+				// float3 p2 = new float3(0f,0f,0f);
+				
+				float3 p0;
+				float3 p1;
+				float3 p2;
 
 				float4x4 _VP;
 				Texture2D _SpriteTex;

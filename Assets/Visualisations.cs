@@ -433,14 +433,14 @@ public class Visualisations : MonoBehaviour
 			if(tb.TrackableName == "cursor") 
 				cursorFound = true;
 		}
-        print("Cursor Found:" + cursorFound);
+        // print("Cursor Found:" + cursorFound);
 
-        pointCloudMaterial.SetFloat("operationRadius", 1f);
-        if(handFound){
-            Vector3 v = handPosition.transform.position; 
-            pointCloudMaterial.SetFloat("dimensionality", 1f);
-            pointCloudMaterial.SetVector("p0Temp", new Vector4(v.x, v.y, v.z, 0f));
-        }
+        // pointCloudMaterial.SetFloat("operationRadius", 1f);
+        // if(handFound){
+            // Vector3 v = handPosition.transform.position; 
+            // pointCloudMaterial.SetFloat("dimensionality", 1f);
+            // pointCloudMaterial.SetVector("p0Temp", new Vector4(v.x, v.y, v.z, 0f));
+        // }
 
         //BBACH: TODO MAP PLANE POSITIONS
         //Communication with the Cube Shader: sets the p0,p1,p2 points of the plane
