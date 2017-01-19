@@ -183,14 +183,15 @@ Shader "Custom/Cube Shader"
 					float4 pSWU = float4(position + SWU, 1.0f);
 					float4 pSWD = float4(position + SWD, 1.0f);
 					
-					//the following commented line will 
+					//the following commented line will make geometry always aligned with 
+					//the viewport, independent from the transform of the game objects 
+					//e.g: no rotation applied to the geometry
 					//float4x4 vp = mul(UNITY_MATRIX_MVP, unity_WorldToObject);
+
 					float4x4 vp = UNITY_MATRIX_MVP;
 					FS_INPUT pIn;
 					
 					// FACE 1
-
-
 					pIn.col = color;
 					
 					pIn.pos = mul(vp, pNWU);
