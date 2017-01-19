@@ -65,7 +65,6 @@ Shader "Custom/Cube Shader"
 					float3	normal	: NORMAL;
 					float2  tex0	: TEXCOORD0;
 					float4  col		: COLOR;
-					float	isBrushed : FLOAT;
 				};
 
 				struct FS_INPUT
@@ -73,7 +72,6 @@ Shader "Custom/Cube Shader"
 					float4	pos		: POSITION;
 					float2  tex0	: TEXCOORD0;
 					float4  col		: COLOR;
-					float	isBrushed : FLOAT;
 				};
 
 
@@ -92,18 +90,6 @@ Shader "Custom/Cube Shader"
 				float _Y;
 				float _Z;
 				float _BrushSize;
-
-				//******************
-				// RANGE VALUES
-				//******************
-
-				float minRX;
-				float minRY;
-				float minRZ;
-
-				float maxRX;
-				float maxRY;
-				float maxRZ;
 
 				//**************************
 				// CUTTING PLANE COORDINATES
@@ -137,50 +123,6 @@ Shader "Custom/Cube Shader"
 				return (j0 - (L * i0) + (L * value));
 				}
 
-				bool brushTest(VS_INPUT v, float x, float y, float z)
-				{
-					bool brushTest = false;
-
-					bool XBrush = !(x < 0.0);
-					bool YBrush = !(y < 0.0);
-					bool ZBrush = !(z < 0.0);
-								
-					bool pixX = (v.position.x < x + maxRX && v.position.x > x - minRX);
-					bool pixY = (v.position.y < y + maxRY && v.position.y > y - minRY);
-					bool pixZ = (v.position.z < z + maxRZ && v.position.z > z - minRZ);
-					
-					if(XBrush && !YBrush && !ZBrush)
-					{
-						brushTest =(pixX);// output.isBrushed = 1.0;
-					}
-					else if(!XBrush && YBrush && !ZBrush)
-					{
-						brushTest = (pixY);// output.isBrushed = 1.0;
-					}
-					else if(!XBrush && !YBrush && ZBrush)
-					{
-						brushTest = (pixZ);// output.isBrushed = 1.0;
-					}
-					else if(XBrush && YBrush && !ZBrush)
-					{
-						brushTest = (pixX && pixY);// output.isBrushed = 1.0;
-					}
-					else if(XBrush && !YBrush && ZBrush)
-					{
-						brushTest = (pixX && pixZ);// output.isBrushed = 1.0;
-					}
-					else if(!XBrush && YBrush && ZBrush)
-					{
-						brushTest = (pixY && pixZ) ;//output.isBrushed = 1.0;
-					}
-					else if(XBrush && YBrush && ZBrush)
-					{
-						brushTest = (pixX && pixY && pixZ);// output.isBrushed = 1.0;
-					}
-
-					return brushTest;
-				}
-
 				// Vertex Shader ------------------------------------------------
 				GS_INPUT VS_Main(VS_INPUT v)
 				{
@@ -204,8 +146,24 @@ Shader "Custom/Cube Shader"
 				}
 
 
-				void emitCube (float3 position, float4 color, float size, float isBrushed,  inout TriangleStream<FS_INPUT> triStream)
+				void emitCube (float3 position, float4 color, float size,  inout TriangleStream<FS_INPUT> triStream)
 				{
+				    /*
+					float3 look = _WorldSpaceCameraPos - p[0].pos;
+					//look.y = 0;
+					look = normalize(look);
+					float3 right = cross(up, look);
+					
+					float halfS = 0.01f * _Size;
+							
+					float4 v[4];
+					
+					v[0] = float4(p[0].pos + halfS * right - halfS * up, 1.0f);
+					v[1] = float4(p[0].pos + halfS * right + halfS * up, 1.0f);
+					v[2] = float4(p[0].pos - halfS * right - halfS * up, 1.0f);
+					v[3] = float4(p[0].pos - halfS * right + halfS * up, 1.0f);
+					*/
+					
 					float3 NEU = float3( size,  size,  size);
 					float3 NED = float3( size, -size,  size);
 					float3 NWU = float3( size,  size, -size);
@@ -225,13 +183,14 @@ Shader "Custom/Cube Shader"
 					float4 pSWU = float4(position + SWU, 1.0f);
 					float4 pSWD = float4(position + SWD, 1.0f);
 					
-					float4x4 vp = mul(UNITY_MATRIX_MVP, unity_WorldToObject);
-					
+					//the following commented line will 
+					//float4x4 vp = mul(UNITY_MATRIX_MVP, unity_WorldToObject);
+					float4x4 vp = UNITY_MATRIX_MVP;
 					FS_INPUT pIn;
 					
 					// FACE 1
 
-					pIn.isBrushed = isBrushed;
+
 					pIn.col = color;
 					
 					pIn.pos = mul(vp, pNWU);
@@ -355,47 +314,18 @@ Shader "Custom/Cube Shader"
 					float ensize = 1.0;// p[0].col.x;
 
 					float halfS = ensize* _Size/500.0;
-//					void emitCube (float3 position, float4 color, float size, float isBrushed,  inout TriangleStream<FS_INPUT> triStream)
-					float isBrushed = p[0].isBrushed;
 
-					//if(isBrushed == 1.0)
-					//{
-					//float3 p0 = p[0].pos;
-					//p0.x = p0.x * 2.0 ;//+ 2.0;
-					//p0.y = p0.y * 2.0;
-					//p0.z = p0.z * 2.0;
-
-					
-					//emitCube(p[0].pos, p[0].col, halfS, 1.0, triStream);
-					////emitCube(p0, p[0].col, halfS, 1.0, triStream);
-
-					//}
-					//else
-					//{
-					emitCube(p[0].pos, p[0].col, halfS, isBrushed, triStream);
-					//}
+					emitCube(p[0].pos, p[0].col, halfS, triStream);
 				}
 
 				// Fragment Shader -----------------------------------------------
 				float4 FS_Main(FS_INPUT input) : COLOR
 				{
 
-				//float blue = 0.0;
-				//float green = 0.0;
-
-				//if (input.isBrushed == 1.0)
-				//{
-				//	_Alpha=1.0;
-				//	blue = 0.55;
-				//	green = 1.0;
-				//}
 				float dx = input.tex0.x;// - 0.5f;
 			    float dy = input.tex0.y;// - 0.5f;
 
 				if(dx > 0.95 || dx < 0.05 || dy <0.05  || dy>0.95 ) return float4(0.0, 0.0, 0.0, 1.0);
-				//else return float4(0.0, 0.0, 0.0, 0.0);
-				//float4 colorReturn = float4(input.col.x, 0.0, 0.5-input.col.x, 1.0);				
-				//return colorReturn; //ambient+diffuse*saturate(dot(Light,Norm));
 				float dt = (dx -0.5) * (dx-0.5) + (dy-0.5) * (dy-0.5);
 
 				return float4(input.col.x-dx/2,input.col.y-dx/2,input.col.z-dx/2,input.col.w);

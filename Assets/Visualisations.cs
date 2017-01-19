@@ -391,8 +391,6 @@ public class Visualisations : MonoBehaviour
         pointCloudMaterial.SetVector("p1Temp", new Vector4());
         pointCloudMaterial.SetVector("p2Temp", new Vector4());
 
-
-
         //if (Input.GetMouseButtonDown(0))
         //{
         //    //empty RaycastHit object which raycast puts the hit details into
