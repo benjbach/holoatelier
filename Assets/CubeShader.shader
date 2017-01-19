@@ -94,13 +94,15 @@ Shader "Custom/Cube Shader"
 				//**************************
 				// CUTTING PLANE COORDINATES
 				//**************************
+				float dimensionality;
 				float4 p0Temp; // temporary plane coordinate 0
 				float4 p1Temp; // temporary plane coordinate 1
 				float4 p2Temp; // temporary plane coordinate 2
+				float operationRadius; // distance that operation affects
 
-				float3 p0;
-				float3 p1;
-				float3 p2;
+				float3 p0 = new float3(0f,0f,0f);
+				float3 p1 = new float3(0f,0f,0f);;
+				float3 p2 = new float3(0f,0f,0f);;
 
 				float4x4 _VP;
 				Texture2D _SpriteTex;
@@ -111,17 +113,23 @@ Shader "Custom/Cube Shader"
 				//*********************************
 				
 				//returns distance from point to plane (p0,p1,p2)
-				float distanceToPlane(float3 vertexPosition)
+				float distanceToPlane(float3 vertexPosition, float3 p0, float3 p1, float3 p2)
 				{
-				//bbach: TODO
+					//bbach: TODO
 					return distance(p0,vertexPosition);
 				}
-
+				float distanceToPoint(float3 vertexPosition, float3 p)
+				{
+					//bbach: TODO
+					return 1;
+				}
 				float normaliseValue(float value, float i0, float i1, float j0, float j1)
 				{
-				float L = (j0 - j1) / (i0 - i1);
-				return (j0 - (L * i0) + (L * value));
+					float L = (j0 - j1) / (i0 - i1);
+					return (j0 - (L * i0) + (L * value));
 				}
+
+
 
 				// Vertex Shader ------------------------------------------------
 				GS_INPUT VS_Main(VS_INPUT v)
@@ -137,13 +145,25 @@ Shader "Custom/Cube Shader"
 					p1 = float3(p1Temp.x,p1Temp.y,p1Temp.z);
 					p2 = float3(p2Temp.x,p2Temp.y,p2Temp.z);
 
-					if(distanceToPlane(v.position)>0.2)
-					colorV.a = 0;
+					float distance = -1.0;
+					// if(dimensionality == 1.0){
+						// distance = distanceToPoint(v, p0)
+					// }
+					// if(dimensionality == 3){
+					// 	distance = distanceToPlane(v, p0, p1, p2)
+					// }
+
+					// if(distance > operationRadius)
+					// 	colorV.w = 0.1;
 
 					output.col = colorV;
 					//if(v.position.z > 0.5) output.col = float4(1.0,0.0,0.0,1.0);
 					return output;
 				}
+
+
+
+			
 
 
 				void emitCube (float3 position, float4 color, float size,  inout TriangleStream<FS_INPUT> triStream)

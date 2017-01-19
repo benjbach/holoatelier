@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UtilGeometry;
+using Vuforia;
 
 
 public class Visualisations : MonoBehaviour
@@ -20,6 +21,23 @@ public class Visualisations : MonoBehaviour
     GameObject MenuDimensions;
     View scatterplot3D;
 
+
+    // Vuforia tracking
+	List<GameObject> cuttingplaneCorners = new List<GameObject>(); 
+	List<DataObject> intersectedObjects = new List<DataObject>();
+	GameObject cursorPosition;
+	GameObject handPosition;
+	GameObject line1;
+	GameObject line2;
+    
+    StateManager sm; 	
+    IEnumerable<TrackableBehaviour> activeTrackables;
+
+
+
+    
+
+
     // Use this for initialization
     void Start()
     {
@@ -27,24 +45,36 @@ public class Visualisations : MonoBehaviour
         dataObject = new DataObject(dataFile.text);
 
 
-        // Cubix
-        float[] coloredData = dataObject.getDimension(7);
-        Color[] cd = Colors.mapDiscreteColor(coloredData); 
-
+        // 3D scatterplot
         GameObject view = createSingle2DView(
             dataObject, // data points 
-            1,2,3, 
+            1,2,3, // csv cols mapped to dimensions 
             -1, // always leave -1 
             MeshTopology.Points, 
             pointCloudMaterial, 
             out scatterplot3D);
 
-        scatterplot3D.setColors(cd);
-                    
+        // Color cubes
+        // float[] coloredData = dataObject.getDimension(7);
+        // Color[] cd = Colors.mapDiscreteColor(coloredData); 
+        // scatterplot3D.setColors(cd);
 
-     
+
+        // Attach tracking target game objects for positions
+        // cuttingplaneCorners.Add(GameObject.Find("CuttingplaneCorner1"));
+        // cuttingplaneCorners.Add(GameObject.Find("CuttingplaneCorner2"));
+        // cuttingplaneCorners.Add(GameObject.Find("CuttingplaneCorner3"));
+        // cuttingplaneCorners.Add(GameObject.Find("CuttingplaneCorner4"));
+
+        cursorPosition = GameObject.Find("AR-Cursor"); 			
+        // handPosition = GameObject.Find("AR-Hand"); 			
+
+
+        sm = TrackerManager.Instance.GetStateManager ();
         
     }
+
+
     /// <summary>
     /// sets the position of the view
     /// </summary>
@@ -385,11 +415,40 @@ public class Visualisations : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        if(pointCloudMaterial == null)
+            return; 
+
+
+        // get marker posisions
+        activeTrackables = sm.GetActiveTrackableBehaviours ();
+ 
+        // find active markers
+        bool handFound = false;
+		bool cursorFound = false;
+		foreach (TrackableBehaviour tb in activeTrackables) {
+
+		 	if(tb.TrackableName == "hand") 
+				handFound = true;
+			if(tb.TrackableName == "cursor") 
+				cursorFound = true;
+		}
+        print("Cursor Found:" + cursorFound);
+
+        pointCloudMaterial.SetFloat("operationRadius", 1f);
+        if(handFound){
+            Vector3 v = handPosition.transform.position; 
+            pointCloudMaterial.SetFloat("dimensionality", 1f);
+            pointCloudMaterial.SetVector("p0Temp", new Vector4(v.x, v.y, v.z, 0f));
+        }
+
         //BBACH: TODO MAP PLANE POSITIONS
         //Communication with the Cube Shader: sets the p0,p1,p2 points of the plane
-        pointCloudMaterial.SetVector("p0Temp", new Vector4());
-        pointCloudMaterial.SetVector("p1Temp", new Vector4());
-        pointCloudMaterial.SetVector("p2Temp", new Vector4());
+        // pointCloudMaterial.SetVector("p0Temp", new Vector4(0f, 0f, 0f, 0f));
+        // pointCloudMaterial.SetVector("p1Temp", new Vector4(0f, 0f, 0f, 0f));
+        // pointCloudMaterial.SetVector("p2Temp", new Vector4(0f, 0f, 0f, 0f));
+
+
 
         //if (Input.GetMouseButtonDown(0))
         //{
