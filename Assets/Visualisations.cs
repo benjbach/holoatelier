@@ -61,17 +61,96 @@ public class Visualisations : MonoBehaviour
 
 
         // Attach tracking target game objects for positions
-        // cuttingplaneCorners.Add(GameObject.Find("CuttingplaneCorner1"));
-        // cuttingplaneCorners.Add(GameObject.Find("CuttingplaneCorner2"));
-        // cuttingplaneCorners.Add(GameObject.Find("CuttingplaneCorner3"));
-        // cuttingplaneCorners.Add(GameObject.Find("CuttingplaneCorner4"));
+        cuttingplaneCorners.Add(GameObject.Find("CuttingplaneCorner1"));
+        cuttingplaneCorners.Add(GameObject.Find("CuttingplaneCorner2"));
+        cuttingplaneCorners.Add(GameObject.Find("CuttingplaneCorner3"));
 
         cursorPosition = GameObject.Find("AR-Cursor"); 			
-        // handPosition = GameObject.Find("AR-Hand"); 			
+        handPosition = GameObject.Find("AR-Hand"); 			
 
 
         sm = TrackerManager.Instance.GetStateManager ();
         
+    }
+
+
+       // Update is called once per frame
+    void Update()
+    {
+
+        if(pointCloudMaterial == null)
+            return; 
+
+
+        // get marker posisions
+        activeTrackables = sm.GetActiveTrackableBehaviours ();
+ 
+        // find active markers
+        bool handFound = false;
+		bool cursorFound = false;
+		foreach (TrackableBehaviour tb in activeTrackables) {
+
+            print("TRACKABLE NAME: " + tb.TrackableName);
+		 	if(tb.TrackableName == "hand") 
+				handFound = true;
+			if(tb.TrackableName == "cursor") 
+				cursorFound = true;
+		}
+
+        pointCloudMaterial.SetFloat("operationRange", .05f);
+        pointCloudMaterial.SetFloat("nonSelectedOpacity", .05f);
+        if(handFound)
+        {
+            pointCloudMaterial.SetFloat("dimensionality", 0);
+            Vector3 v = handPosition.transform.position; 
+            pointCloudMaterial.SetVector("p0Temp", new Vector4(v.x, v.y, v.z, 0f));
+        }
+        else if(cursorFound)
+        {
+            pointCloudMaterial.SetFloat("dimensionality", 2);
+            Vector3 v0 = cuttingplaneCorners[0].transform.position; 
+            Vector3 v1 = cuttingplaneCorners[1].transform.position; 
+            Vector3 v2 = cuttingplaneCorners[2].transform.position; 
+            pointCloudMaterial.SetVector("p0Temp", new Vector4(v0.x, v0.y, v0.z, 0f));
+            pointCloudMaterial.SetVector("p1Temp", new Vector4(v1.x, v1.y, v1.z, 0f));
+            pointCloudMaterial.SetVector("p2Temp", new Vector4(v2.x, v2.y, v2.z, 0f));
+        }
+
+        //BBACH: TODO MAP PLANE POSITIONS
+        //Communication with the Cube Shader: sets the p0,p1,p2 points of the plane
+
+
+
+        //if (Input.GetMouseButtonDown(0))
+        //{
+        //    //empty RaycastHit object which raycast puts the hit details into
+        //    RaycastHit hit;
+        //    //ray shooting out of the camera from where the mouse is
+        //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        //    if (Physics.Raycast(ray, out hit))
+        //    {
+        //        //print out the name if the raycast hits something
+        //        int k = (dataObject.dimensionToIndex(hit.transform.name));
+
+        //        if (dimension1 < 0) dimension1 = k;
+        //        if (dimension2 < 0 && dimension1 != k) dimension2 = k;
+
+        //        if (dimension1 > 0 && dimension2 > 0)
+        //        {
+        //            View v;
+        //            createSingle2DView(dataObject, dimension1, dimension2, -1, -1, MeshTopology.Points, pointCloudMaterial, out v);
+        //        }
+
+        //    }
+        //}
+        //if(Input.GetMouseButtonDown(1))
+        //{
+        //    dimension1 = -1;
+        //    dimension2 = -1;
+        //}
+
+
     }
 
 
@@ -412,75 +491,7 @@ public class Visualisations : MonoBehaviour
 
     View snappedView;
     
-    // Update is called once per frame
-    void Update()
-    {
 
-        if(pointCloudMaterial == null)
-            return; 
-
-
-        // get marker posisions
-        activeTrackables = sm.GetActiveTrackableBehaviours ();
- 
-        // find active markers
-        bool handFound = false;
-		bool cursorFound = false;
-		foreach (TrackableBehaviour tb in activeTrackables) {
-
-		 	if(tb.TrackableName == "hand") 
-				handFound = true;
-			if(tb.TrackableName == "cursor") 
-				cursorFound = true;
-		}
-        // print("Cursor Found:" + cursorFound);
-
-        // pointCloudMaterial.SetFloat("operationRadius", 1f);
-        // if(handFound){
-            // Vector3 v = handPosition.transform.position; 
-            // pointCloudMaterial.SetFloat("dimensionality", 1f);
-            // pointCloudMaterial.SetVector("p0Temp", new Vector4(v.x, v.y, v.z, 0f));
-        // }
-
-        //BBACH: TODO MAP PLANE POSITIONS
-        //Communication with the Cube Shader: sets the p0,p1,p2 points of the plane
-        // pointCloudMaterial.SetVector("p0Temp", new Vector4(0f, 0f, 0f, 0f));
-        // pointCloudMaterial.SetVector("p1Temp", new Vector4(0f, 0f, 0f, 0f));
-        // pointCloudMaterial.SetVector("p2Temp", new Vector4(0f, 0f, 0f, 0f));
-
-
-
-        //if (Input.GetMouseButtonDown(0))
-        //{
-        //    //empty RaycastHit object which raycast puts the hit details into
-        //    RaycastHit hit;
-        //    //ray shooting out of the camera from where the mouse is
-        //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        //    if (Physics.Raycast(ray, out hit))
-        //    {
-        //        //print out the name if the raycast hits something
-        //        int k = (dataObject.dimensionToIndex(hit.transform.name));
-
-        //        if (dimension1 < 0) dimension1 = k;
-        //        if (dimension2 < 0 && dimension1 != k) dimension2 = k;
-
-        //        if (dimension1 > 0 && dimension2 > 0)
-        //        {
-        //            View v;
-        //            createSingle2DView(dataObject, dimension1, dimension2, -1, -1, MeshTopology.Points, pointCloudMaterial, out v);
-        //        }
-
-        //    }
-        //}
-        //if(Input.GetMouseButtonDown(1))
-        //{
-        //    dimension1 = -1;
-        //    dimension2 = -1;
-        //}
-
-
-    }
 
 
 }

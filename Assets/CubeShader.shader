@@ -98,12 +98,10 @@ Shader "Custom/Cube Shader"
 				float4 p0Temp; // temporary plane coordinate 0
 				float4 p1Temp; // temporary plane coordinate 1
 				float4 p2Temp; // temporary plane coordinate 2
-				float operationRadius; // distance that operation affects
+				float operationRange; // distance that operation affects
 
-				// float3 p0 = new float3(0f,0f,0f);
-				// float3 p1 = new float3(0f,0f,0f);
-				// float3 p2 = new float3(0f,0f,0f);
-				
+				float nonSelectedOpacity; // distance that operation affects
+			
 				float3 p0;
 				float3 p1;
 				float3 p2;
@@ -117,15 +115,16 @@ Shader "Custom/Cube Shader"
 				//*********************************
 				
 				//returns distance from point to plane (p0,p1,p2)
-				float distanceToPlane(float3 vertexPosition, float3 p0, float3 p1, float3 p2)
+				float distanceToPlane(float3 v, float3 p0, float3 p1, float3 p2)
 				{
 					//bbach: TODO
-					return distance(p0,vertexPosition);
+					float3 n = normalize(cross(p1-p0, p1-p2));
+					float dist = dot(n, v - p0);
+					return abs(dist);				
 				}
-				float distanceToPoint(float3 vertexPosition, float3 p)
+				float distanceToPoint(float3 v, float3 p)
 				{
-					//bbach: TODO
-					return 1;
+					return distance(v, p);
 				}
 				float normaliseValue(float value, float i0, float i1, float j0, float j1)
 				{
@@ -149,16 +148,17 @@ Shader "Custom/Cube Shader"
 					p1 = float3(p1Temp.x,p1Temp.y,p1Temp.z);
 					p2 = float3(p2Temp.x,p2Temp.y,p2Temp.z);
 
-					float distance = -1.0;
-					// if(dimensionality == 1.0){
-						// distance = distanceToPoint(v, p0)
-					// }
-					// if(dimensionality == 3){
-					// 	distance = distanceToPlane(v, p0, p1, p2)
-					// }
+					float vDistance = -1;
+					float4 pos = v.position;
+					if(dimensionality == 0){
+						vDistance = distanceToPoint(float3(pos.x, pos.y, pos.z), p0);
+					}else
+					if(dimensionality == 2){
+						vDistance = distanceToPlane(float3(pos.x, pos.y, pos.z), p0, p1, p2);
+					}
 
-					// if(distance > operationRadius)
-					// 	colorV.w = 0.1;
+					if(vDistance > operationRange)
+						colorV.w = nonSelectedOpacity;
 
 					output.col = colorV;
 					//if(v.position.z > 0.5) output.col = float4(1.0,0.0,0.0,1.0);
@@ -347,13 +347,15 @@ Shader "Custom/Cube Shader"
 				float4 FS_Main(FS_INPUT input) : COLOR
 				{
 
-				float dx = input.tex0.x;// - 0.5f;
-			    float dy = input.tex0.y;// - 0.5f;
+					float dx = input.tex0.x;// - 0.5f;
+					float dy = input.tex0.y;// - 0.5f;
 
-				if(dx > 0.95 || dx < 0.05 || dy <0.05  || dy>0.95 ) return float4(0.0, 0.0, 0.0, 1.0);
-				float dt = (dx -0.5) * (dx-0.5) + (dy-0.5) * (dy-0.5);
+					// if(dx > 0.95 || dx < 0.05 || dy <0.05  || dy>0.95 ) 
+					// 	return float4(0.0, 0.0, 0.0, 1.0);
+					
+					float dt = (dx -0.5) * (dx-0.5) + (dy-0.5) * (dy-0.5);
 
-				return float4(input.col.x-dx/2,input.col.y-dx/2,input.col.z-dx/2,input.col.w);
+					return float4(input.col.x-dx/2,input.col.y-dx/2,input.col.z-dx/2,input.col.w);
 				}
 			
 
