@@ -101,12 +101,14 @@ public class Visualisations : MonoBehaviour
         pointCloudMaterial.SetFloat("nonSelectedOpacity", .05f);
         if(handFound)
         {
+            pointCloudMaterial.SetFloat("operationRange", .2f);
             pointCloudMaterial.SetFloat("dimensionality", 0);
             Vector3 v = handPosition.transform.position; 
             pointCloudMaterial.SetVector("p0Temp", new Vector4(v.x, v.y, v.z, 0f));
         }
         else if(cursorFound)
         {
+            pointCloudMaterial.SetFloat("operationRange", .05f);
             pointCloudMaterial.SetFloat("dimensionality", 2);
             Vector3 v0 = cuttingplaneCorners[0].transform.position; 
             Vector3 v1 = cuttingplaneCorners[1].transform.position; 
