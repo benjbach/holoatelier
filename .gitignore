@@ -4,7 +4,6 @@
 /[Tt]emp/
 /[Oo]bj/
 /[Bb]uild
-/[Ll]ibrary/
 sysinfo.txt
 *.stackdump
  
@@ -13,8 +12,6 @@ sysinfo.txt
 # ============================================= #
 [Ee]xported[Oo]bj/
 .vs/
-/*.userprefs
-/*.pidb
 /*.suo
 /*.user
 /*.booproj
