@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Linq; 
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+// using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections.Generic;
 using System;
 using System.Xml.Linq;
@@ -32,50 +32,50 @@ public class UtilMath {
 	}
 
 	//format fileName : @"C:\Users\maxc\Documents\Maxime\DATA FOR VISUALISATION\TEST.BIN"
-	public static void SerializeVector3(Vector3[] data, string fileName)
-	{
-		using (FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite))
-		{
-			BinaryFormatter bf = new BinaryFormatter();
-			bf.Serialize(fs, data);
-		}
-	}
+	// public static void SerializeVector3(Vector3[] data, string fileName)
+	// {
+	// 	using (FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite))
+	// 	{
+	// 		BinaryFormatter bf = new BinaryFormatter();
+	// 		bf.Serialize(fs, data);
+	// 	}
+	// }
 
-	//format fileName : @"C:\Users\maxc\Documents\Maxime\DATA FOR VISUALISATION\TEST.BIN"
-	public static Vector3[] DeserializeVector3(string fileName)
-	{
-		using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
-		{
+	// //format fileName : @"C:\Users\maxc\Documents\Maxime\DATA FOR VISUALISATION\TEST.BIN"
+	// public static Vector3[] DeserializeVector3(string fileName)
+	// {
+	// 	using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+	// 	{
 
-			BinaryFormatter bf = new BinaryFormatter();
-			Vector3[] result = (Vector3[])bf.Deserialize(fs);		
+	// 		BinaryFormatter bf = new BinaryFormatter();
+	// 		Vector3[] result = (Vector3[])bf.Deserialize(fs);		
 			
-			return result;
-		}
-	}
+	// 		return result;
+	// 	}
+	// }
 
-	//format fileName : @"C:\Users\maxc\Documents\Maxime\DATA FOR VISUALISATION\TEST.BIN"
-	public static void SerializeInt(int[] data, string fileName)
-	{
-		using (FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite))
-		{
-			BinaryFormatter bf = new BinaryFormatter();
-			bf.Serialize(fs, data);
-		}
-	}
+	// //format fileName : @"C:\Users\maxc\Documents\Maxime\DATA FOR VISUALISATION\TEST.BIN"
+	// public static void SerializeInt(int[] data, string fileName)
+	// {
+	// 	using (FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite))
+	// 	{
+	// 		BinaryFormatter bf = new BinaryFormatter();
+	// 		bf.Serialize(fs, data);
+	// 	}
+	// }
 	
-	//format fileName : @"C:\Users\maxc\Documents\Maxime\DATA FOR VISUALISATION\TEST.BIN"
-	public static int[] DeserializeInt(string fileName)
-	{
-		using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
-		{
+	// //format fileName : @"C:\Users\maxc\Documents\Maxime\DATA FOR VISUALISATION\TEST.BIN"
+	// public static int[] DeserializeInt(string fileName)
+	// {
+	// 	using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+	// 	{
 			
-			BinaryFormatter bf = new BinaryFormatter();
-			int[] result = (int[])bf.Deserialize(fs);		
+	// 		BinaryFormatter bf = new BinaryFormatter();
+	// 		int[] result = (int[])bf.Deserialize(fs);		
 			
-			return result;
-		}
-	}
+	// 		return result;
+	// 	}
+	// }
 
 	/// <summary>
 	/// Projects a point on sphere.

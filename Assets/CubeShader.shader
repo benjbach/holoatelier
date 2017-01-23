@@ -39,7 +39,7 @@ Shader "Custom/Cube Shader"
 			ZWrite On
 			ZTest [unity_GUIZTestMode]
             Cull Off
-			AlphaTest Greater 0
+			// AlphaTest Greater 0
 			
 		
 			CGPROGRAM
