@@ -11,6 +11,20 @@ using Vuforia;
 public class Visualisations : MonoBehaviour
 {
 
+
+    // STATIC CONFIGS
+    // Names of pictures in the tracker data base. 
+    // Database name: "Atelier".
+    string POINT_TRACKER_NAME = "Point";
+    string PLANE_TRACKER_NAME = "Plane";
+    string T_0_TRACKER_NAME = "T_0";
+    string T_3_TRACKER_NAME = "T_3";
+    string C_RED_TRACKER_NAME = "C_red";
+    string C_BLUE_TRACKER_NAME = "C_blue";
+
+    float DEFAULT_UNSELECTED_TRANSPARENCY = .3f;
+    Vector4 DEFAULT_SELECTED_COLOR = new Vector4(1f, 1f, 1f, 1f); 
+
     //View v;
     public Material pointCloudMaterial;
     public Material linesGraphMaterial;
@@ -26,7 +40,6 @@ public class Visualisations : MonoBehaviour
 	List<GameObject> cuttingplaneCorners = new List<GameObject>(); 
 	List<DataObject> intersectedObjects = new List<DataObject>();
 	GameObject cursorPosition;
-	GameObject handPosition;
 	GameObject line1;
 	GameObject line2;
     
@@ -54,19 +67,12 @@ public class Visualisations : MonoBehaviour
             pointCloudMaterial, 
             out scatterplot3D);
 
-        // Color cubes
-        // float[] coloredData = dataObject.getDimension(7);
-        // Color[] cd = Colors.mapDiscreteColor(coloredData); 
-        // scatterplot3D.setColors(cd);
-
-
         // Attach tracking target game objects for positions
         cuttingplaneCorners.Add(GameObject.Find("CuttingplaneCorner1"));
         cuttingplaneCorners.Add(GameObject.Find("CuttingplaneCorner2"));
         cuttingplaneCorners.Add(GameObject.Find("CuttingplaneCorner3"));
 
-        cursorPosition = GameObject.Find("AR-Cursor"); 			
-        handPosition = GameObject.Find("AR-Hand"); 			
+        cursorPosition = GameObject.Find("AR_point"); 			
 
 
         sm = TrackerManager.Instance.GetStateManager ();
@@ -86,27 +92,45 @@ public class Visualisations : MonoBehaviour
         activeTrackables = sm.GetActiveTrackableBehaviours ();
  
         // find active markers
-        bool handFound = false;
-		bool cursorFound = false;
+        bool planeFound = false;
+		bool pointFound = false;
+        float nonSelectedOpacity = DEFAULT_UNSELECTED_TRANSPARENCY;
+        Vector4 selectedColor = DEFAULT_SELECTED_COLOR;
 		foreach (TrackableBehaviour tb in activeTrackables) {
 
-            print("TRACKABLE NAME: " + tb.TrackableName);
-		 	if(tb.TrackableName == "hand") 
-				handFound = true;
-			if(tb.TrackableName == "cursor") 
-				cursorFound = true;
+		 	if(tb.TrackableName == PLANE_TRACKER_NAME) 
+				planeFound = true;
+
+			if(tb.TrackableName == POINT_TRACKER_NAME) 
+				pointFound = true;
+
+			if(tb.TrackableName == T_0_TRACKER_NAME) 
+				nonSelectedOpacity = 0f;
+
+			if(tb.TrackableName == T_3_TRACKER_NAME) 
+				nonSelectedOpacity = .3f;
+
+            if(tb.TrackableName == C_RED_TRACKER_NAME) 
+                selectedColor = new Vector4(1f, 0f, 0f, 1f);
+
+            if(tb.TrackableName == C_BLUE_TRACKER_NAME) 
+                selectedColor = new Vector4(0f, 0f, 1f, 1f);
 		}
 
+
+
         pointCloudMaterial.SetFloat("operationRange", .05f);
-        pointCloudMaterial.SetFloat("nonSelectedOpacity", .05f);
-        if(handFound)
+        pointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
+        pointCloudMaterial.SetVector("selectionColor", selectedColor);
+
+        if(pointFound)
         {
             pointCloudMaterial.SetFloat("operationRange", .2f);
             pointCloudMaterial.SetFloat("dimensionality", 0);
-            Vector3 v = handPosition.transform.position; 
+            Vector3 v = cursorPosition.transform.position; 
             pointCloudMaterial.SetVector("p0Temp", new Vector4(v.x, v.y, v.z, 0f));
         }
-        else if(cursorFound)
+        else if(planeFound)
         {
             pointCloudMaterial.SetFloat("operationRange", .05f);
             pointCloudMaterial.SetFloat("dimensionality", 2);
@@ -154,6 +178,18 @@ public class Visualisations : MonoBehaviour
 
 
     }
+
+
+
+
+
+
+
+
+    //////////////////////////
+    // VIEW GENERATION CODE //
+    //////////////////////////
+
 
 
     /// <summary>

@@ -27,9 +27,9 @@ Shader "Custom/Cube Shader"
 
 			Tags
 			{
-			"Queue" = "Transparent"
-			"IgnoreProjector" = "True"
-			"RenderType" = "Transparent"
+				"Queue" = "Transparent"
+				"IgnoreProjector" = "True"
+				"RenderType" = "Transparent"
 			}
 						
 			Blend SrcAlpha OneMinusSrcAlpha 
@@ -99,7 +99,7 @@ Shader "Custom/Cube Shader"
 				float4 p1Temp; // temporary plane coordinate 1
 				float4 p2Temp; // temporary plane coordinate 2
 				float operationRange; // distance that operation affects
-
+				float4 selectionColor;
 				float nonSelectedOpacity; // distance that operation affects
 			
 				float3 p0;
@@ -142,7 +142,18 @@ Shader "Custom/Cube Shader"
 					// calculates screen position for vertex
 					output.pos =  mul(unity_ObjectToWorld, v.position);
 					
+
 					float4 colorV = v.color;
+					bool selectionColorSet = false;
+
+					if(!(selectionColor.x == 0 
+					&& selectionColor.y == 0
+					&& selectionColor.z == 0
+					&& selectionColor.w == 0))
+					{
+						selectionColorSet = true;
+					}
+
 					// test the distance of the vertex to the plane
 					p0 = float3(p0Temp.x,p0Temp.y,p0Temp.z);
 					p1 = float3(p1Temp.x,p1Temp.y,p1Temp.z);
@@ -158,7 +169,13 @@ Shader "Custom/Cube Shader"
 					}
 
 					if(vDistance > operationRange)
+					{
 						colorV.w = nonSelectedOpacity;
+					}else{
+						if(selectionColorSet){
+							colorV = selectionColor;
+						}
+					}
 
 					output.col = colorV;
 					//if(v.position.z > 0.5) output.col = float4(1.0,0.0,0.0,1.0);
