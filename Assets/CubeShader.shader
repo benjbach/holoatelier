@@ -217,7 +217,7 @@ Shader "Custom/Cube Shader"
 					float4 pNEU = float4(position + NEU, 1.0f);
 					float4 pNED = float4(position + NED, 1.0f);
 					float4 pNWU = float4(position + NWU, 1.0f);
-					float4 pNWD = float4(position+ NWD, 1.0f);
+					float4 pNWD = float4(position + NWD, 1.0f);
 
 					float4 pSEU = float4(position + SEU, 1.0f);
 					float4 pSED = float4(position + SED, 1.0f);

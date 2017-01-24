@@ -108,7 +108,7 @@ public class Visualisations : MonoBehaviour
 				nonSelectedOpacity = 0f;
 
 			if(tb.TrackableName == T_3_TRACKER_NAME) 
-				nonSelectedOpacity = .3f;
+				nonSelectedOpacity = .1f;
 
             if(tb.TrackableName == C_RED_TRACKER_NAME) 
                 selectedColor = new Vector4(1f, 0f, 0f, 1f);
