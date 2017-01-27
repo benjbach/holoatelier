@@ -76,7 +76,7 @@ public class Visualisations : MonoBehaviour
 
 
         sm = TrackerManager.Instance.GetStateManager ();
-        
+   
     }
 
 
@@ -116,8 +116,6 @@ public class Visualisations : MonoBehaviour
             if(tb.TrackableName == C_BLUE_TRACKER_NAME) 
                 selectedColor = new Vector4(0f, 0f, 1f, 1f);
 		}
-
-
 
         pointCloudMaterial.SetFloat("operationRange", .05f);
         pointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
@@ -368,9 +366,11 @@ public class Visualisations : MonoBehaviour
         if (DimensionZ >= 0)
         {
             v.setDataDimension(dobjs.getDimension(DimensionZ), View.VIEW_DIMENSION.Z);
-            GameObject labelZ = createLabel(dobjs.indexToDimension(DimensionY), view, new Vector3(-0.1f, 0.1f, 0.1f));
+            GameObject labelZ = createLabel(dobjs.indexToDimension(DimensionZ), view, new Vector3(-0.1f, 0.1f, 0.1f));
             labelZ.transform.Rotate(0f, -90f, 00f);
         }
+
+        // print("viewName : " + viewName);
 
         if (LinkIndex < 0)
             v.updateView(null);
