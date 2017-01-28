@@ -140,8 +140,8 @@ Shader "Custom/Cube Shader"
 					GS_INPUT output = (GS_INPUT)0;
 					
 					// calculates screen position for vertex
-					output.pos =  mul(unity_ObjectToWorld, v.position);
-					
+					// output.pos =  mul(unity_ObjectToWorld, v.position);
+					output.pos = v.position;
 
 					float4 colorV = v.color;
 					bool selectionColorSet = false;
@@ -161,6 +161,7 @@ Shader "Custom/Cube Shader"
 
 					float vDistance = -1;
 					float4 pos = v.position;
+
 					if(dimensionality == 0){
 						vDistance = distanceToPoint(float3(pos.x, pos.y, pos.z), p0);
 					}else
