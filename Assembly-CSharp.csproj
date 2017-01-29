@@ -89,12 +89,12 @@
      <Compile Include="Assets\Vuforia\Scripts\WireframeTrackableEventHandler.cs" />
      <Compile Include="Assets\Vuforia\Scripts\WordBehaviour.cs" />
      <Compile Include="Assets\tracking\trackable.cs" />
+     <None Include="Assets\StreamingAssets\QCAR\Atelier.xml" />
      <None Include="Assets\Vuforia\Shaders\ColoredLines.shader" />
      <None Include="Assets\GSBillboard.shader" />
      <None Include="Assets\link.xml" />
      <None Include="Assets\Vuforia\Shaders\VertexLitWithZ.shader" />
      <None Include="Assets\Vuforia\Shaders\RenderVideoBackground.shader" />
-     <None Include="Assets\StreamingAssets\QCAR\Atelier.xml" />
      <None Include="Assets\CubeShader.shader" />
      <None Include="Assets\Vuforia\Shaders\VideoBackground.shader" />
      <None Include="Assets\StreamingAssets\QCAR\Tracker.xml" />
