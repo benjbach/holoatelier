@@ -22,14 +22,28 @@ public class Visualisations : MonoBehaviour
     string C_RED_TRACKER_NAME = "C_red";
     string C_BLUE_TRACKER_NAME = "C_blue";
 
-    float DEFAULT_UNSELECTED_TRANSPARENCY = .3f;
+    float DEFAULT_UNSELECTED_TRANSPARENCY = .01f;
     Vector4 DEFAULT_SELECTED_COLOR = new Vector4(1f, 1f, 1f, 1f); 
 
     //View v;
     public Material pointCloudMaterial;
     public Material linesGraphMaterial;
 
-    public TextAsset dataFile;
+    // public TextAsset dataFile;
+
+    public struct FileSpec
+    {
+        public string fileName;
+        public int dim1;
+        public int dim2;
+        public int dim3;
+    }
+    public FileSpec fileSpec = new FileSpec(){
+        fileName = "cameras", 
+        dim1 = 1, 
+        dim2 = 2, 
+        dim3 = 3 
+        };
 
     DataObject dataObject;
     GameObject MenuDimensions;
@@ -49,23 +63,29 @@ public class Visualisations : MonoBehaviour
 
 
     
-
-
     // Use this for initialization
     void Start()
     {
         //loads a dataset
-        dataObject = new DataObject(dataFile.text);
+        // print(">>>>>> dataFile.text: " + dataFile.text);
+        // dataObject = new DataObject(dataFile.text);
+
+        string text = System.IO.File.ReadAllText("Assets/data/"+ fileSpec.fileName + ".csv");
+        dataObject = new DataObject(text);
 
 
         // 3D scatterplot
         GameObject view = createSingle2DView(
             dataObject, // data points 
-            1,2,3, // csv cols mapped to dimensions 
+            fileSpec.dim1,
+            fileSpec.dim2,
+            fileSpec.dim3,
             -1, // always leave -1 
             MeshTopology.Points, 
             pointCloudMaterial, 
             out scatterplot3D);
+        
+        view.transform.position = new Vector3(-0.2f, -0.17f, 1.17f);
 
         // Attach tracking target game objects for positions
         cuttingplaneCorners.Add(GameObject.Find("CuttingplaneCorner1"));

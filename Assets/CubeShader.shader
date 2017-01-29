@@ -6,10 +6,11 @@ Shader "Custom/Cube Shader"
 	Properties 
 	{
 		_SpriteTex ("RGBA Texture Image", 2D) = "white" {}
-		_Size ("Size", Range(0, 30)) = 0.5
-		_X("X",Range(0,1)) = 0.5
-		_Y("Y",Range(0,1)) = 0.5
-		_Z("Z",Range(0,1)) = 0.5
+		_Size ("Size", Range(0, 30)) = 0.01
+		_Scale("Scale",Range(0,10)) = 0.5
+		// _X("X",Range(0,1)) = 0.5
+		// _Y("Y",Range(0,1)) = 0.5
+		// _Z("Z",Range(0,1)) = 0.5
 		_BrushSize("BrushSize",Float) = 0.05
 		_MinD0("MinD0",Float) = 0
 		_MaxD0("MaxD0",Float) = 0
@@ -39,8 +40,7 @@ Shader "Custom/Cube Shader"
 			ZWrite On
 			ZTest [unity_GUIZTestMode]
             Cull Off
-			AlphaTest Greater 0
-			
+			AlphaTest Greater 0			
 		
 			CGPROGRAM
 				#pragma target 4.0
@@ -85,10 +85,11 @@ Shader "Custom/Cube Shader"
 				int LengthArray;
 
 				float _Size;
+				float _Scale;
 				float4 _IndexPos;
-				float _X;
-				float _Y;
-				float _Z;
+				// float _X;
+				// float _Y;
+				// float _Z;
 				float _BrushSize;
 
 				//**************************
@@ -354,9 +355,13 @@ Shader "Custom/Cube Shader"
 				[maxvertexcount(48)]
 				void GS_Main(point GS_INPUT p[1], inout TriangleStream<FS_INPUT> triStream)
 				{
-					float ensize = 1.0;// p[0].col.x;
+					float ensize = 1.0; // p[0].col.x;
 
-					float halfS = ensize* _Size/500.0;
+					// float halfS = ensize* _Size/500.0;
+					float halfS = _Size * .5;
+					p[0].pos.y *= _Scale;
+					p[0].pos.x *= _Scale;
+					p[0].pos.z *= _Scale;
 
 					emitCube(p[0].pos, p[0].col, halfS, triStream);
 				}
