@@ -22,7 +22,7 @@ public class Visualisations : MonoBehaviour
     string C_RED_TRACKER_NAME = "C_red";
     string C_BLUE_TRACKER_NAME = "C_blue";
 
-    float DEFAULT_UNSELECTED_TRANSPARENCY = .05f;
+    float DEFAULT_UNSELECTED_TRANSPARENCY = .3f;
     Vector4 DEFAULT_SELECTED_COLOR = new Vector4(1f, 1f, 1f, 1f); 
 
     //View v;
@@ -85,7 +85,7 @@ public class Visualisations : MonoBehaviour
             pointCloudMaterial, 
             out scatterplot3D);
         
-        view.transform.position = new Vector3(-0.2f, -0.17f, 1.17f);
+//        view.transform.position = new Vector3(-0.2f, -0.17f, 1.17f);
 
         // Attach tracking target game objects for positions
         cuttingplaneCorners.Add(GameObject.Find("CuttingplaneCorner1"));
