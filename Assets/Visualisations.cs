@@ -16,20 +16,20 @@ public class Visualisations : MonoBehaviour
     // Names of pictures in the tracker data base. 
     // Database name: "Atelier".
     string POINT_TRACKER_NAME = "Point";
-    string PLANE_TRACKER_NAME = "Plane";
+    string PLANE_TRACKER_NAME = "stones";
     string T_0_TRACKER_NAME = "T_0";
     string T_3_TRACKER_NAME = "T_3";
     string C_RED_TRACKER_NAME = "C_red";
     string C_BLUE_TRACKER_NAME = "C_blue";
 
-    float DEFAULT_UNSELECTED_TRANSPARENCY = .3f;
+    float DEFAULT_UNSELECTED_TRANSPARENCY = .1f;
     Vector4 DEFAULT_SELECTED_COLOR = new Vector4(1f, 1f, 1f, 1f); 
 
     //View v;
     public Material pointCloudMaterial;
     public Material linesGraphMaterial;
 
-    // public TextAsset dataFile;
+    public TextAsset dataFile;
 
     public struct FileSpec
     {
@@ -67,11 +67,11 @@ public class Visualisations : MonoBehaviour
     void Start()
     {
         //loads a dataset
-        // print(">>>>>> dataFile.text: " + dataFile.text);
-        // dataObject = new DataObject(dataFile.text);
+        print(">>>>>> dataFile.text: " + dataFile.text);
+        dataObject = new DataObject(dataFile.text);
 
-        string text = System.IO.File.ReadAllText("Assets/data/"+ fileSpec.fileName + ".csv");
-        dataObject = new DataObject(text);
+        // string text = System.IO.File.ReadAllText("Assets/data/"+ fileSpec.fileName + ".csv");
+        // dataObject = new DataObject(text);
 
 
         // 3D scatterplot
