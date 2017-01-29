@@ -22,7 +22,7 @@ public class Visualisations : MonoBehaviour
     string C_RED_TRACKER_NAME = "C_red";
     string C_BLUE_TRACKER_NAME = "C_blue";
 
-    float DEFAULT_UNSELECTED_TRANSPARENCY = .01f;
+    float DEFAULT_UNSELECTED_TRANSPARENCY = .05f;
     Vector4 DEFAULT_SELECTED_COLOR = new Vector4(1f, 1f, 1f, 1f); 
 
     //View v;
