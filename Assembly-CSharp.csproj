@@ -52,6 +52,7 @@
      <Compile Include="Assets\Triangulator.cs" />
      <Compile Include="Assets\UtilMath.cs" />
      <Compile Include="Assets\View.cs" />
+     <Compile Include="Assets\Visualisations-2.cs" />
      <Compile Include="Assets\Visualisations.cs" />
      <Compile Include="Assets\Vuforia\Scripts\BackgroundPlaneBehaviour.cs" />
      <Compile Include="Assets\Vuforia\Scripts\CloudRecoBehaviour.cs" />
@@ -89,7 +90,6 @@
      <Compile Include="Assets\Vuforia\Scripts\WireframeTrackableEventHandler.cs" />
      <Compile Include="Assets\Vuforia\Scripts\WordBehaviour.cs" />
      <Compile Include="Assets\tracking\trackable.cs" />
-     <None Include="Assets\StreamingAssets\QCAR\Atelier.xml" />
      <None Include="Assets\Vuforia\Shaders\ColoredLines.shader" />
      <None Include="Assets\GSBillboard.shader" />
      <None Include="Assets\link.xml" />
@@ -97,6 +97,7 @@
      <None Include="Assets\Vuforia\Shaders\RenderVideoBackground.shader" />
      <None Include="Assets\CubeShader.shader" />
      <None Include="Assets\Vuforia\Shaders\VideoBackground.shader" />
+     <None Include="Assets\StreamingAssets\QCAR\Atelier.xml" />
      <None Include="Assets\StreamingAssets\QCAR\Tracker.xml" />
      <None Include="Assets\Vuforia\Editor\WebcamProfiles\profiles.xml" />
      <None Include="Assets\Vuforia\Shaders\DepthMask.shader" />
