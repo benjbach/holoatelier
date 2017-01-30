@@ -91,7 +91,7 @@ public class Visualisations : MonoBehaviour
             pointCloudMaterial, 
             out scatterplot3D);
         
-//        view.transform.position = new Vector3(-0.2f, -0.17f, 1.17f);
+    //    view.transform.position = new Vector3(-3.2f, 0.04f, -2.48f);
 
         // Attach tracking target game objects for positions
         cuttingplaneCorners.Add(GameObject.Find("CuttingplaneCorner1"));
