@@ -22,7 +22,7 @@ public class Visualisations : MonoBehaviour
     string C_RED_TRACKER_NAME = "C_red";
     string C_BLUE_TRACKER_NAME = "C_blue";
 
-    float DEFAULT_UNSELECTED_TRANSPARENCY = .1f;
+    float DEFAULT_UNSELECTED_TRANSPARENCY = .01f;
     Vector4 DEFAULT_SELECTED_COLOR = new Vector4(1f, 1f, 1f, 1f); 
 
     //View v;
@@ -138,12 +138,12 @@ public class Visualisations : MonoBehaviour
                 selectedColor = new Vector4(0f, 0f, 1f, 1f);
 		}
 
-        pointCloudMaterial.SetFloat("operationRange", .05f);
-        pointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
-        pointCloudMaterial.SetVector("selectionColor", selectedColor);
+        pointCloudMaterial.SetFloat("nonSelectedOpacity", 1f);
 
-        if(pointFound)
+        if (pointFound)
         {
+            pointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
+            pointCloudMaterial.SetVector("selectionColor", selectedColor);
             pointCloudMaterial.SetFloat("operationRange", .2f);
             pointCloudMaterial.SetFloat("dimensionality", 0);
             Vector3 v = cursorPosition.transform.position; 
@@ -151,6 +151,8 @@ public class Visualisations : MonoBehaviour
         }
         else if(planeFound)
         {
+            pointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
+            pointCloudMaterial.SetVector("selectionColor", selectedColor);
             pointCloudMaterial.SetFloat("operationRange", .05f);
             pointCloudMaterial.SetFloat("dimensionality", 2);
             Vector3 v0 = cuttingplaneCorners[0].transform.position; 
