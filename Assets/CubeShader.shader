@@ -154,7 +154,9 @@ Shader "Custom/Cube Shader"
 					// output.pos =  mul(UNITY_MATRIX_MVP, v.position);
 					// float3 worldPos = mul (unity_ObjectToWorld, v.vertex).xyz;
 
-					float4 pos = output.pos;
+					// float4 pos = output.pos;
+					float4 pos =  mul(unity_ObjectToWorld, v.position);
+
 
 					float4 colorV = v.color;
 					bool selectionColorSet = false;
