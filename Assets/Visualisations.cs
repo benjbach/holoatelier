@@ -77,9 +77,10 @@ public class Visualisations : MonoBehaviour
         // 3D scatterplot
         GameObject view = createSingle2DView(
             dataObject, // data points 
-            fileSpec.dim1,
-            fileSpec.dim2,
-            fileSpec.dim3,
+            // fileSpec.dim1,
+            // fileSpec.dim2,
+            // fileSpec.dim3,
+            1,2,3,
             -1, // always leave -1 
             MeshTopology.Points, 
             pointCloudMaterial, 
