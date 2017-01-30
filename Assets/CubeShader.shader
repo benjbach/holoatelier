@@ -1,4 +1,6 @@
 ﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+
+// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 // Upgrade NOTE: replaced '_World2Object' with 'unity_WorldToObject'
 
 Shader "Custom/Cube Shader" 
@@ -139,10 +141,21 @@ Shader "Custom/Cube Shader"
 				GS_INPUT VS_Main(VS_INPUT v)
 				{
 					GS_INPUT output = (GS_INPUT)0;
+
+					v.position.x *= _Scale;
+					v.position.y *= _Scale;
+					v.position.z *= _Scale;
 					
 					// calculates screen position for vertex
 					// output.pos =  mul(unity_ObjectToWorld, v.position);
-					output.pos = v.position;
+					// output.pos =  mul(unity_ObjectToWorld, v.position).xyz;
+					// v.position
+
+					output.pos =  mul(UNITY_MATRIX_MVP, v.position);
+					// float3 worldPos = mul (unity_ObjectToWorld, v.vertex).xyz;
+
+					// output.pos = v.position;
+					float4 pos = output.pos;
 
 					float4 colorV = v.color;
 					bool selectionColorSet = false;
@@ -161,7 +174,8 @@ Shader "Custom/Cube Shader"
 					p2 = float3(p2Temp.x,p2Temp.y,p2Temp.z);
 
 					float vDistance = -1;
-					float4 pos = v.position;
+					// float4 pos = v.position;
+					
 
 					if(dimensionality == 0){
 						vDistance = distanceToPoint(float3(pos.x, pos.y, pos.z), p0);
@@ -359,9 +373,9 @@ Shader "Custom/Cube Shader"
 
 					// float halfS = ensize* _Size/500.0;
 					float halfS = _Size * .5;
-					p[0].pos.y *= _Scale;
-					p[0].pos.x *= _Scale;
-					p[0].pos.z *= _Scale;
+					// p[0].pos.y *= _Scale;
+					// p[0].pos.x *= _Scale;
+					// p[0].pos.z *= _Scale;
 
 					emitCube(p[0].pos, p[0].col, halfS, triStream);
 				}
