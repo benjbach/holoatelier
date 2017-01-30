@@ -22,28 +22,31 @@ public class Visualisations : MonoBehaviour
     string C_RED_TRACKER_NAME = "C_red";
     string C_BLUE_TRACKER_NAME = "C_blue";
 
-    float DEFAULT_UNSELECTED_TRANSPARENCY = .01f;
-    Vector4 DEFAULT_SELECTED_COLOR = new Vector4(1f, 1f, 1f, 1f); 
+    static float DEFAULT_UNSELECTED_TRANSPARENCY = .01f;
+    static Vector4 DEFAULT_SELECTED_COLOR = new Vector4(1f, 1f, 1f, 1f); 
+    static float DEFAULT_POINT_SIZE = 0.003f; // 3 mm
+    static float DEFAULT_SCALE = 0.1f;   // 1 cm
+    static float DEFAULT_OPERATION_RANGE = DEFAULT_POINT_SIZE;
 
     //View v;
     public Material pointCloudMaterial;
     public Material linesGraphMaterial;
 
     public TextAsset dataFile;
-
-    public struct FileSpec
-    {
-        public string fileName;
-        public int dim1;
-        public int dim2;
-        public int dim3;
-    }
-    public FileSpec fileSpec = new FileSpec(){
-        fileName = "cameras", 
-        dim1 = 1, 
-        dim2 = 2, 
-        dim3 = 3 
-        };
+    public int[] dim = new int[3]{1,2,3};
+    // public struct FileSpec
+    // {
+    //     public string fileName;
+    //     public int dim1;
+    //     public int dim2;
+    //     public int dim3;
+    // }
+    // public FileSpec fileSpec = new FileSpec(){
+    //     fileName = "cameras", 
+    //     dim1 = 1, 
+    //     dim2 = 2, 
+    //     dim3 = 3 
+    //     };
 
     DataObject dataObject;
     GameObject MenuDimensions;
@@ -80,7 +83,9 @@ public class Visualisations : MonoBehaviour
             // fileSpec.dim1,
             // fileSpec.dim2,
             // fileSpec.dim3,
-            1,2,3,
+            dim[0],
+            dim[1],
+            dim[2],
             -1, // always leave -1 
             MeshTopology.Points, 
             pointCloudMaterial, 
@@ -139,22 +144,20 @@ public class Visualisations : MonoBehaviour
 		}
 
         pointCloudMaterial.SetFloat("nonSelectedOpacity", 1f);
-
+        pointCloudMaterial.SetFloat("operationRange", DEFAULT_OPERATION_RANGE);
         if (pointFound)
         {
+            pointCloudMaterial.SetFloat("dimensionality", 0);
             pointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
             pointCloudMaterial.SetVector("selectionColor", selectedColor);
-            pointCloudMaterial.SetFloat("operationRange", .2f);
-            pointCloudMaterial.SetFloat("dimensionality", 0);
             Vector3 v = cursorPosition.transform.position; 
             pointCloudMaterial.SetVector("p0Temp", new Vector4(v.x, v.y, v.z, 0f));
         }
         else if(planeFound)
         {
+            pointCloudMaterial.SetFloat("dimensionality", 2);
             pointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
             pointCloudMaterial.SetVector("selectionColor", selectedColor);
-            pointCloudMaterial.SetFloat("operationRange", .05f);
-            pointCloudMaterial.SetFloat("dimensionality", 2);
             Vector3 v0 = cuttingplaneCorners[0].transform.position; 
             Vector3 v1 = cuttingplaneCorners[1].transform.position; 
             Vector3 v2 = cuttingplaneCorners[2].transform.position; 
