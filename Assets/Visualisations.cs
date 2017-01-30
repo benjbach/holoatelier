@@ -15,7 +15,7 @@ public class Visualisations : MonoBehaviour
     // STATIC CONFIGS
     // Names of pictures in the tracker data base. 
     // Database name: "Atelier".
-    string POINT_TRACKER_NAME = "Point";
+    string POINT_TRACKER_NAME = "cursor";
     string PLANE_TRACKER_NAME = "stones";
     string T_0_TRACKER_NAME = "T_0";
     string T_3_TRACKER_NAME = "T_3";
@@ -147,10 +147,12 @@ public class Visualisations : MonoBehaviour
         pointCloudMaterial.SetFloat("operationRange", DEFAULT_OPERATION_RANGE);
         if (pointFound)
         {
+            pointCloudMaterial.SetFloat("operationRange", .01f);
             pointCloudMaterial.SetFloat("dimensionality", 0);
             pointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
             pointCloudMaterial.SetVector("selectionColor", selectedColor);
             Vector3 v = cursorPosition.transform.position; 
+            print(v);
             pointCloudMaterial.SetVector("p0Temp", new Vector4(v.x, v.y, v.z, 0f));
         }
         else if(planeFound)
