@@ -7,7 +7,7 @@ Shader "Custom/Cube Shader"
 	{
 		_SpriteTex ("RGBA Texture Image", 2D) = "white" {}
 		_Size ("Size", Range(0, 30)) = 0.01
-		_Scale("Scale",Range(0,10)) = 0.5
+		_Scale("Scale",Range(0,10)) = 0.3
 		// _X("X",Range(0,1)) = 0.5
 		// _Y("Y",Range(0,1)) = 0.5
 		// _Z("Z",Range(0,1)) = 0.5
