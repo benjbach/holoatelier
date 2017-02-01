@@ -106,6 +106,7 @@ Shader "Custom/Cube Shader"
 				float operationRange; // distance that operation affects
 				float4 selectionColor;
 				float nonSelectedOpacity;
+				int preventSelectionUpdate;
 
 				int vertexCount;
 
@@ -181,15 +182,22 @@ Shader "Custom/Cube Shader"
 
 					float vDistance = -1;
 					// float4 pos = v.position;
-					
 
+					if(dimensionality == -1){
+						vDistance = operationRange+1; // each cube will be outside of operation range
+					}
+					else
 					if(dimensionality == 0){
 						vDistance = distanceToPoint(float3(pos.x, pos.y, pos.z), p0);
 					}else
 					if(dimensionality == 2){
 						vDistance = distanceToPlane(float3(pos.x, pos.y, pos.z), p0, p1, p2);
 					}
-
+					else
+					if(dimensionality == 4){
+						vDistance = 0; // each cube will be outside of operation range
+					}
+					
 					if(vDistance > operationRange)
 					{
 						colorV.w = nonSelectedOpacity;

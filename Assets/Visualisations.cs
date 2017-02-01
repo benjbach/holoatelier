@@ -43,7 +43,8 @@ public class Visualisations : MonoBehaviour
     public Material mainViewPointCloudMaterial;
     View secondView;
     GameObject secondViewGO;
-    public Material secondViewPointCloudMaterial;
+    public Material secondaryViewPointCloudMaterial;
+    Shader cubeShader;
 
 
     // Vuforia tracking
@@ -58,12 +59,20 @@ public class Visualisations : MonoBehaviour
 
     GameObject currentSelectionMarker;
 
-    bool viewExtracing = false;
+    bool viewExtracting = false;
 
     
     // Use this for initialization
     void Start()
     {
+
+        cubeShader = Shader.Find("Custom/Cube Shader");
+        
+
+        mainViewPointCloudMaterial = new Material(cubeShader);
+        mainViewPointCloudMaterial.SetFloat("_Size", 0.002f);
+        mainViewPointCloudMaterial.SetFloat("_Scale", 0.1f);
+
         //loads a dataset
         print(">>>>>> dataFile.text: " + dataFile.text);
         dataObject = new DataObject(dataFile.text);
@@ -101,8 +110,6 @@ public class Visualisations : MonoBehaviour
         if(mainViewPointCloudMaterial == null)
             return; 
 
-        if(viewExtracing) 
-            return;
 
 
         // get marker posisions
@@ -112,16 +119,26 @@ public class Visualisations : MonoBehaviour
         bool planeFound = false;
 		bool pointFound = false;
         bool extractFound = false;
+        int dimensionality = 3;
         float nonSelectedOpacity = DEFAULT_UNSELECTED_TRANSPARENCY;
         Vector4 selectedColor = DEFAULT_SELECTED_COLOR;
-		foreach (TrackableBehaviour tb in activeTrackables) {
 
+        Vector3 v0 = cuttingplaneCorners[0].transform.position; ;
+        Vector3 v1 = cuttingplaneCorners[1].transform.position; ;
+        Vector3 v2 = cuttingplaneCorners[2].transform.position; ; 
+
+		foreach (TrackableBehaviour tb in activeTrackables) 
+        {
 		 	if(tb.TrackableName == PLANE_TRACKER_NAME) {
-				planeFound = true;
+				dimensionality = 2;
+                v0 = cuttingplaneCorners[0].transform.position; 
+                v1 = cuttingplaneCorners[1].transform.position; 
+                v2 = cuttingplaneCorners[2].transform.position; 
             }
 
 			if(tb.TrackableName == POINT_TRACKER_NAME){
-				pointFound = true;
+				dimensionality = 0;
+                v0 = cursorPosition.transform.position; 
             }
 
 			if(tb.TrackableName == T_0_TRACKER_NAME) 
@@ -140,43 +157,66 @@ public class Visualisations : MonoBehaviour
                 selectedColor = new Vector4(0f, 0f, 1f, 1f);
 		}
       
-        mainViewPointCloudMaterial.SetFloat("nonSelectedOpacity", 1f);
-        mainViewPointCloudMaterial.SetFloat("operationRange", DEFAULT_OPERATION_RANGE);
 
-        if (pointFound)
+        // default main view and look for selections
+
+        // mainViewPointCloudMaterial.SetFloat("nonSelectedOpacity", 1f);
+        // mainViewPointCloudMaterial.SetFloat("dimensionality", -1); // prevent distance detection
+        // mainViewPointCloudMaterial.SetFloat("operationRange", DEFAULT_OPERATION_RANGE);
+
+
+        if(viewExtracting && dimensionality < 3)
         {
-            mainViewPointCloudMaterial.SetFloat("operationRange", .01f);
-            mainViewPointCloudMaterial.SetFloat("dimensionality", 0);
-            mainViewPointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
-            mainViewPointCloudMaterial.SetVector("selectionColor", selectedColor);
-            Vector3 v = cursorPosition.transform.position; 
-            print(v);
-            mainViewPointCloudMaterial.SetVector("p0Temp", new Vector4(v.x, v.y, v.z, 0f));
+
+            // update selection positions in secondary view only (main view is not visible)
+            if(dimensionality > -1){
+                secondaryViewPointCloudMaterial.SetVector("p0Temp", new Vector4(v0.x, v0.y, v0.z, 0f));
+            } 
+            if(dimensionality > 1){
+                secondaryViewPointCloudMaterial.SetVector("p0Temp", new Vector4(v0.x, v0.y, v0.z, 0f));
+                secondaryViewPointCloudMaterial.SetVector("p1Temp", new Vector4(v1.x, v1.y, v1.z, 0f));
+                secondaryViewPointCloudMaterial.SetVector("p2Temp", new Vector4(v2.x, v2.y, v2.z, 0f));
+            }
+
         }
-        else if(planeFound)
+        else
         {
-
-            Vector3 v0 = cuttingplaneCorners[0].transform.position; 
-            Vector3 v1 = cuttingplaneCorners[1].transform.position; 
-            Vector3 v2 = cuttingplaneCorners[2].transform.position; 
-
+            // no view extracting
+            
             if(extractFound)
             {
+                
+                // set mainview entirely to default transparency; 
+                mainViewPointCloudMaterial.SetFloat("operationRange", 0f);
+
+
+                // CREATE NEW VIEW
+
                 // print(">>> EXTRACT <<<<");
-                Vector3[] positions = mainView.MyMesh.vertices;
-                List<int> highlightedIndices = helper.cuttingPlane(v0,v1,v2, positions, DEFAULT_OPERATION_RANGE );
+                // Vector3[] positions = mainView.MyMesh.vertices;
+                // List<int> highlightedIndices = helper.cuttingPlane(v0,v1,v2, positions, DEFAULT_OPERATION_RANGE );
                 // print("highlightedIndices:" + highlightedIndices.Count);
 
                 // CREATE NEW VIEW
                 // create new view object with exactly same configs 
+                
+                secondaryViewPointCloudMaterial = new Material(cubeShader);
+                // init default
+                secondaryViewPointCloudMaterial.SetFloat("dimensionality", 2);
+                secondaryViewPointCloudMaterial.SetFloat("operationRange", DEFAULT_OPERATION_RANGE);
+                secondaryViewPointCloudMaterial.SetFloat("nonSelectedOpacity", 0f);
+                secondaryViewPointCloudMaterial.SetVector("selectionColor", selectedColor);
+                secondaryViewPointCloudMaterial.SetFloat("_Size", 0.002f);
+                secondaryViewPointCloudMaterial.SetFloat("_Scale", 0.1f);
+
+
                 secondViewGO = createSingle2DView(
                     dataObject, // data points 
                     0,1,2,3,
                     -1, // always leave -1 
                     MeshTopology.Points, 
-                    secondViewPointCloudMaterial, 
+                    secondaryViewPointCloudMaterial, 
                     out secondView);
-
 
                 // set only present vertices
                 // secondView.positions = highlightedVertices;
@@ -185,40 +225,59 @@ public class Visualisations : MonoBehaviour
 
                 secondViewGO.transform.position = mainViewGO.transform.position;
                 secondViewGO.transform.rotation = mainViewGO.transform.rotation;
-                secondViewGO.transform.parent = cuttingplaneCorners[0].transf orm;
+                secondViewGO.transform.parent = cuttingplaneCorners[0].transform;
 
-
-                viewExtracing = true;
+                viewExtracting = true;
 
                 // set main view entirely invisible
-                mainViewPointCloudMaterial.SetFloat("dimensionality", 2);
-                mainViewPointCloudMaterial.SetFloat("operationRange", 0f);
-                mainViewPointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
-                // mainViewPointCloudMaterial.SetVector("p0Temp", new Vector4(0f, 0f, 0f, 0f));
-                // mainViewPointCloudMaterial.SetVector("p1Temp", new Vector4(0f, 0f, 0f, 0f));
-                // mainViewPointCloudMaterial.SetVector("p2Temp", new Vector4(0f, 0f, 0f, 0f));
+                // mainViewPointCloudMaterial.SetFloat("dimensionality", 2);
+                // mainViewPointCloudMaterial.SetFloat("operationRange", 0f);
+                // mainViewPointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
 
-                secondViewPointCloudMaterial = secondViewGO.GetComponent<Renderer>().material;
+                // Material myMaterial = Resources.Load("Cube", typeof(Material)) as Material;
+                // secondaryViewPointCloudMaterial = Instantiate(myMaterial);
+                // secondViewGO.GetComponent<Renderer>().material = secondaryViewPointCloudMaterial;
+                // secondaryViewPointCloudMaterial = secondViewGO.GetComponent<Renderer>().material;
 
-                secondViewPointCloudMaterial.SetFloat("dimensionality", 2);
-                // secondViewPointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
-                secondViewPointCloudMaterial.SetFloat("nonSelectedOpacity", .1f);
-                secondViewPointCloudMaterial.SetVector("p0Temp", new Vector4(v0.x, v0.y, v0.z, 0f));
-                secondViewPointCloudMaterial.SetVector("p1Temp", new Vector4(v1.x, v1.y, v1.z, 0f));
-                secondViewPointCloudMaterial.SetVector("p2Temp", new Vector4(v2.x, v2.y, v2.z, 0f));
+                // secondViewGO.GetComponent<Renderer>().material = secondaryViewPointCloudMaterial;
+
+                // also prevent main view from being updated.
+                
+                mainViewPointCloudMaterial.SetFloat("dimensionality", -1);
+
+                // if(pointFound){
+                //     secondaryViewPointCloudMaterial.SetVector("p0Temp", new Vector4(v0.x, v0.y, v0.z, 0f));
+                // } 
+
+                // if(planeFound){
+                //     secondaryViewPointCloudMaterial.SetVector("p1Temp", new Vector4(v1.x, v1.y, v1.z, 0f));
+                //     secondaryViewPointCloudMaterial.SetVector("p2Temp", new Vector4(v2.x, v2.y, v2.z, 0f));
+                // }
 
             }
             else
             {
-                mainViewPointCloudMaterial.SetFloat("dimensionality", 2);
-                mainViewPointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
-                mainViewPointCloudMaterial.SetVector("selectionColor", selectedColor);
-                mainViewPointCloudMaterial.SetVector("p0Temp", new Vector4(v0.x, v0.y, v0.z, 0f));
-                mainViewPointCloudMaterial.SetVector("p1Temp", new Vector4(v1.x, v1.y, v1.z, 0f));
-                mainViewPointCloudMaterial.SetVector("p2Temp", new Vector4(v2.x, v2.y, v2.z, 0f));
-            }
 
-        }
+                mainViewPointCloudMaterial.SetFloat("dimensionality", dimensionality);
+                if(dimensionality < 3)
+                {
+                    mainViewPointCloudMaterial.SetVector("selectionColor", selectedColor);
+                    mainViewPointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
+                    mainViewPointCloudMaterial.SetFloat("operationRange", DEFAULT_OPERATION_RANGE);
+
+                    if(dimensionality > -1){
+                        mainViewPointCloudMaterial.SetVector("p0Temp", new Vector4(v0.x, v0.y, v0.z, 0f));
+                    } 
+                    if(dimensionality > 1){
+                        mainViewPointCloudMaterial.SetVector("p0Temp", new Vector4(v0.x, v0.y, v0.z, 0f));
+                        mainViewPointCloudMaterial.SetVector("p1Temp", new Vector4(v1.x, v1.y, v1.z, 0f));
+                        mainViewPointCloudMaterial.SetVector("p2Temp", new Vector4(v2.x, v2.y, v2.z, 0f));
+                    }
+                }
+            }
+        } 
+        
+
 
 
     }
@@ -446,13 +505,13 @@ public class Visualisations : MonoBehaviour
         if (DimensionSize >= 0)
         {
             // v.setDataDimension(dobjs.getDimension(DimensionSize), View.VIEW_DIMENSION.SIZE);
-            float[] arr = dobjs.getDimension("weight");
-            List<Vector3> temp = new List<Vector3>();
-            print("===" + arr[10]);
-            for(int i=0 ; i<arr.Length ; i++){
-                temp.Add(new Vector3(arr[i], 0f, 0f));
-            }
-            v.MyMesh.normals = temp.ToArray();
+            // float[] arr = dobjs.getDimension("weight");
+            // List<Vector3> temp = new List<Vector3>();
+            // print("===" + arr[10]);
+            // for(int i=0 ; i<arr.Length ; i++){
+            //     temp.Add(new Vector3(arr[i], 0f, 0f));
+            // }
+            // v.MyMesh.normals = temp.ToArray();
 
         }
 
