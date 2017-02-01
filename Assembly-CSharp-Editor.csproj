@@ -52,10 +52,10 @@
      <Compile Include="Assets\Vuforia\Editor\Scripts\VuforiaConfigurationEditor.cs" />
      <None Include="Assets\Vuforia\Shaders\ColoredLines.shader" />
      <None Include="Assets\GSBillboard.shader" />
+     <None Include="Assets\StreamingAssets\QCAR\Atelier.xml" />
      <None Include="Assets\link.xml" />
      <None Include="Assets\Vuforia\Shaders\VertexLitWithZ.shader" />
      <None Include="Assets\Vuforia\Shaders\RenderVideoBackground.shader" />
-     <None Include="Assets\StreamingAssets\QCAR\Atelier.xml" />
      <None Include="Assets\CubeShader.shader" />
      <None Include="Assets\Vuforia\Shaders\VideoBackground.shader" />
      <None Include="Assets\StreamingAssets\QCAR\Tracker.xml" />

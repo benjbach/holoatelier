@@ -21,6 +21,7 @@ public class Visualisations : MonoBehaviour
     string T_3_TRACKER_NAME = "T_3";
     string C_RED_TRACKER_NAME = "C_red";
     string C_BLUE_TRACKER_NAME = "C_blue";
+    string EXTRACT_TRACKER_NAME = "extract";
 
     static float DEFAULT_UNSELECTED_TRANSPARENCY = .01f;
     static Vector4 DEFAULT_SELECTED_COLOR = new Vector4(1f, 1f, 1f, 1f); 
@@ -29,28 +30,20 @@ public class Visualisations : MonoBehaviour
     static float DEFAULT_OPERATION_RANGE = DEFAULT_POINT_SIZE;
 
     //View v;
-    public Material pointCloudMaterial;
     public Material linesGraphMaterial;
 
     public TextAsset dataFile;
-    public int[] dim = new int[3]{1,2,3};
-    // public struct FileSpec
-    // {
-    //     public string fileName;
-    //     public int dim1;
-    //     public int dim2;
-    //     public int dim3;
-    // }
-    // public FileSpec fileSpec = new FileSpec(){
-    //     fileName = "cameras", 
-    //     dim1 = 1, 
-    //     dim2 = 2, 
-    //     dim3 = 3 
-    //     };
+    // public int[] dim = new int[3]{1,2,3};
+    public int[] dim = new int[4]{0,1,2,3};
 
     DataObject dataObject;
     GameObject MenuDimensions;
-    View scatterplot3D;
+    View mainView;
+    GameObject mainViewGO;
+    public Material mainViewPointCloudMaterial;
+    View secondView;
+    GameObject secondViewGO;
+    public Material secondViewPointCloudMaterial;
 
 
     // Vuforia tracking
@@ -63,7 +56,9 @@ public class Visualisations : MonoBehaviour
     StateManager sm; 	
     IEnumerable<TrackableBehaviour> activeTrackables;
 
+    GameObject currentSelectionMarker;
 
+    bool viewExtracing = false;
 
     
     // Use this for initialization
@@ -78,21 +73,14 @@ public class Visualisations : MonoBehaviour
 
 
         // 3D scatterplot
-        GameObject view = createSingle2DView(
+        mainViewGO = createSingle2DView(
             dataObject, // data points 
-            // fileSpec.dim1,
-            // fileSpec.dim2,
-            // fileSpec.dim3,
-            dim[0],
-            dim[1],
-            dim[2],
+            0,1,2,3,
             -1, // always leave -1 
             MeshTopology.Points, 
-            pointCloudMaterial, 
-            out scatterplot3D);
+            mainViewPointCloudMaterial, 
+            out mainView);
         
-    //    view.transform.position = new Vector3(-3.2f, 0.04f, -2.48f);
-
         // Attach tracking target game objects for positions
         cuttingplaneCorners.Add(GameObject.Find("CuttingplaneCorner1"));
         cuttingplaneCorners.Add(GameObject.Find("CuttingplaneCorner2"));
@@ -110,8 +98,11 @@ public class Visualisations : MonoBehaviour
     void Update()
     {
 
-        if(pointCloudMaterial == null)
+        if(mainViewPointCloudMaterial == null)
             return; 
+
+        if(viewExtracing) 
+            return;
 
 
         // get marker posisions
@@ -120,15 +111,18 @@ public class Visualisations : MonoBehaviour
         // find active markers
         bool planeFound = false;
 		bool pointFound = false;
+        bool extractFound = false;
         float nonSelectedOpacity = DEFAULT_UNSELECTED_TRANSPARENCY;
         Vector4 selectedColor = DEFAULT_SELECTED_COLOR;
 		foreach (TrackableBehaviour tb in activeTrackables) {
 
-		 	if(tb.TrackableName == PLANE_TRACKER_NAME) 
+		 	if(tb.TrackableName == PLANE_TRACKER_NAME) {
 				planeFound = true;
+            }
 
-			if(tb.TrackableName == POINT_TRACKER_NAME) 
+			if(tb.TrackableName == POINT_TRACKER_NAME){
 				pointFound = true;
+            }
 
 			if(tb.TrackableName == T_0_TRACKER_NAME) 
 				nonSelectedOpacity = 0f;
@@ -139,68 +133,92 @@ public class Visualisations : MonoBehaviour
             if(tb.TrackableName == C_RED_TRACKER_NAME) 
                 selectedColor = new Vector4(1f, 0f, 0f, 1f);
 
+           if(tb.TrackableName == EXTRACT_TRACKER_NAME) 
+                extractFound = true;
+
             if(tb.TrackableName == C_BLUE_TRACKER_NAME) 
                 selectedColor = new Vector4(0f, 0f, 1f, 1f);
 		}
+      
+        mainViewPointCloudMaterial.SetFloat("nonSelectedOpacity", 1f);
+        mainViewPointCloudMaterial.SetFloat("operationRange", DEFAULT_OPERATION_RANGE);
 
-        pointCloudMaterial.SetFloat("nonSelectedOpacity", 1f);
-        pointCloudMaterial.SetFloat("operationRange", DEFAULT_OPERATION_RANGE);
         if (pointFound)
         {
-            pointCloudMaterial.SetFloat("operationRange", .01f);
-            pointCloudMaterial.SetFloat("dimensionality", 0);
-            pointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
-            pointCloudMaterial.SetVector("selectionColor", selectedColor);
+            mainViewPointCloudMaterial.SetFloat("operationRange", .01f);
+            mainViewPointCloudMaterial.SetFloat("dimensionality", 0);
+            mainViewPointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
+            mainViewPointCloudMaterial.SetVector("selectionColor", selectedColor);
             Vector3 v = cursorPosition.transform.position; 
             print(v);
-            pointCloudMaterial.SetVector("p0Temp", new Vector4(v.x, v.y, v.z, 0f));
+            mainViewPointCloudMaterial.SetVector("p0Temp", new Vector4(v.x, v.y, v.z, 0f));
         }
         else if(planeFound)
         {
-            pointCloudMaterial.SetFloat("dimensionality", 2);
-            pointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
-            pointCloudMaterial.SetVector("selectionColor", selectedColor);
+
             Vector3 v0 = cuttingplaneCorners[0].transform.position; 
             Vector3 v1 = cuttingplaneCorners[1].transform.position; 
             Vector3 v2 = cuttingplaneCorners[2].transform.position; 
-            pointCloudMaterial.SetVector("p0Temp", new Vector4(v0.x, v0.y, v0.z, 0f));
-            pointCloudMaterial.SetVector("p1Temp", new Vector4(v1.x, v1.y, v1.z, 0f));
-            pointCloudMaterial.SetVector("p2Temp", new Vector4(v2.x, v2.y, v2.z, 0f));
+
+            if(extractFound)
+            {
+                // print(">>> EXTRACT <<<<");
+                Vector3[] positions = mainView.MyMesh.vertices;
+                List<int> highlightedIndices = helper.cuttingPlane(v0,v1,v2, positions, DEFAULT_OPERATION_RANGE );
+                // print("highlightedIndices:" + highlightedIndices.Count);
+
+                // CREATE NEW VIEW
+                // create new view object with exactly same configs 
+                secondViewGO = createSingle2DView(
+                    dataObject, // data points 
+                    0,1,2,3,
+                    -1, // always leave -1 
+                    MeshTopology.Points, 
+                    secondViewPointCloudMaterial, 
+                    out secondView);
+
+
+                // set only present vertices
+                // secondView.positions = highlightedVertices;
+                // secondView.updateMeshPositions(null);
+                // secondView.updateView(null);
+
+                secondViewGO.transform.position = mainViewGO.transform.position;
+                secondViewGO.transform.rotation = mainViewGO.transform.rotation;
+                secondViewGO.transform.parent = cuttingplaneCorners[0].transf orm;
+
+
+                viewExtracing = true;
+
+                // set main view entirely invisible
+                mainViewPointCloudMaterial.SetFloat("dimensionality", 2);
+                mainViewPointCloudMaterial.SetFloat("operationRange", 0f);
+                mainViewPointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
+                // mainViewPointCloudMaterial.SetVector("p0Temp", new Vector4(0f, 0f, 0f, 0f));
+                // mainViewPointCloudMaterial.SetVector("p1Temp", new Vector4(0f, 0f, 0f, 0f));
+                // mainViewPointCloudMaterial.SetVector("p2Temp", new Vector4(0f, 0f, 0f, 0f));
+
+                secondViewPointCloudMaterial = secondViewGO.GetComponent<Renderer>().material;
+
+                secondViewPointCloudMaterial.SetFloat("dimensionality", 2);
+                // secondViewPointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
+                secondViewPointCloudMaterial.SetFloat("nonSelectedOpacity", .1f);
+                secondViewPointCloudMaterial.SetVector("p0Temp", new Vector4(v0.x, v0.y, v0.z, 0f));
+                secondViewPointCloudMaterial.SetVector("p1Temp", new Vector4(v1.x, v1.y, v1.z, 0f));
+                secondViewPointCloudMaterial.SetVector("p2Temp", new Vector4(v2.x, v2.y, v2.z, 0f));
+
+            }
+            else
+            {
+                mainViewPointCloudMaterial.SetFloat("dimensionality", 2);
+                mainViewPointCloudMaterial.SetFloat("nonSelectedOpacity", nonSelectedOpacity);
+                mainViewPointCloudMaterial.SetVector("selectionColor", selectedColor);
+                mainViewPointCloudMaterial.SetVector("p0Temp", new Vector4(v0.x, v0.y, v0.z, 0f));
+                mainViewPointCloudMaterial.SetVector("p1Temp", new Vector4(v1.x, v1.y, v1.z, 0f));
+                mainViewPointCloudMaterial.SetVector("p2Temp", new Vector4(v2.x, v2.y, v2.z, 0f));
+            }
+
         }
-
-        //BBACH: TODO MAP PLANE POSITIONS
-        //Communication with the Cube Shader: sets the p0,p1,p2 points of the plane
-
-
-
-        //if (Input.GetMouseButtonDown(0))
-        //{
-        //    //empty RaycastHit object which raycast puts the hit details into
-        //    RaycastHit hit;
-        //    //ray shooting out of the camera from where the mouse is
-        //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        //    if (Physics.Raycast(ray, out hit))
-        //    {
-        //        //print out the name if the raycast hits something
-        //        int k = (dataObject.dimensionToIndex(hit.transform.name));
-
-        //        if (dimension1 < 0) dimension1 = k;
-        //        if (dimension2 < 0 && dimension1 != k) dimension2 = k;
-
-        //        if (dimension1 > 0 && dimension2 > 0)
-        //        {
-        //            View v;
-        //            createSingle2DView(dataObject, dimension1, dimension2, -1, -1, MeshTopology.Points, pointCloudMaterial, out v);
-        //        }
-
-        //    }
-        //}
-        //if(Input.GetMouseButtonDown(1))
-        //{
-        //    dimension1 = -1;
-        //    dimension2 = -1;
-        //}
 
 
     }
@@ -217,6 +235,22 @@ public class Visualisations : MonoBehaviour
     //////////////////////////
 
 
+    GameObject createLabel(string label, GameObject parent, Vector3 position)
+    {
+        GameObject TextObject = new GameObject(label);
+        TextObject.AddComponent<TextMesh>();
+        TextMesh tm = TextObject.GetComponent<TextMesh>();
+        tm.text = label;
+        TextObject.transform.localPosition = position;
+        TextObject.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
+        tm.fontSize = 108;
+        tm.color = Color.black;
+        TextObject.AddComponent<BoxCollider>();
+
+        TextObject.transform.parent = parent.transform;
+
+        return TextObject;
+    }
 
     /// <summary>
     /// sets the position of the view
@@ -365,14 +399,25 @@ public class Visualisations : MonoBehaviour
     /// <param name="topology"></param>
     /// <param name="LinkIndex"> the linking field to create a graph; pass a negative value to ignore</param>
     /// <returns></returns>
-    GameObject createSingle2DView(DataObject dobjs, int DimensionX, int DimensionY, int DimensionZ, int LinkIndex, MeshTopology topology, Material m, out View v)
+    GameObject createSingle2DView(
+        DataObject dobjs, 
+        int DimensionX, 
+        int DimensionY, 
+        int DimensionZ, 
+        int DimensionSize, 
+        int LinkIndex, 
+        MeshTopology topology, 
+        Material m, 
+        out View v)
     {
         v = new View(topology);
         string viewName = "";
         
-        if (DimensionX >= 0) viewName += dobjs.indexToDimension(DimensionX) + " - ";
-        if (DimensionY >= 0) viewName += dobjs.indexToDimension(DimensionY) + " - ";
-        if (DimensionZ >= 0) viewName += dobjs.indexToDimension(DimensionZ);
+        if (DimensionX > -1) viewName += dobjs.indexToDimension(DimensionX) + " - ";
+        if (DimensionY > -1) viewName += dobjs.indexToDimension(DimensionY) + " - ";
+        if (DimensionZ > -1) viewName += dobjs.indexToDimension(DimensionZ) + " - ";
+        if (DimensionSize > -1) viewName += dobjs.indexToDimension(DimensionSize);
+
 
         GameObject view = new GameObject(viewName);
         view.transform.parent = transform;
@@ -397,6 +442,19 @@ public class Visualisations : MonoBehaviour
             GameObject labelZ = createLabel(dobjs.indexToDimension(DimensionZ), view, new Vector3(-0.1f, 0.1f, 0.1f));
             labelZ.transform.Rotate(0f, -90f, 00f);
         }
+        
+        if (DimensionSize >= 0)
+        {
+            // v.setDataDimension(dobjs.getDimension(DimensionSize), View.VIEW_DIMENSION.SIZE);
+            float[] arr = dobjs.getDimension("weight");
+            List<Vector3> temp = new List<Vector3>();
+            print("===" + arr[10]);
+            for(int i=0 ; i<arr.Length ; i++){
+                temp.Add(new Vector3(arr[i], 0f, 0f));
+            }
+            v.MyMesh.normals = temp.ToArray();
+
+        }
 
         // print("viewName : " + viewName);
 
@@ -417,145 +475,157 @@ public class Visualisations : MonoBehaviour
 
         return view;
     }
-    /// <summary>
-    /// Creates a 2D Diff view
-    /// </summary>
-    /// <param name="dobjs"></param>
-    /// <param name="DimensionX"></param>
-    /// <param name="DimensionY"></param>
-    /// <param name="DimensionZ"></param>
-    /// <param name="LinkIndex"></param>
-    /// <param name="topology"></param>
-    /// <param name="m"></param>
-    /// <returns></returns>
-    GameObject create2DDiffView(DataObject dobjs, int DimensionX, int DimensionY, int DimensionZ, int ToDimensionX, int ToDimensionY, int ToDimensionZ, int LinkIndex, MeshTopology topology, Material m)
+
+
+
+    void OnSelect()
     {
-        View v = new View(topology);
-        string viewName = "";
-
-        if (DimensionX >= 0) viewName += dobjs.indexToDimension(DimensionX) + " - ";
-        if (DimensionY >= 0) viewName += dobjs.indexToDimension(DimensionY) + " - ";
-        if (DimensionZ >= 0) viewName += dobjs.indexToDimension(DimensionZ);
-
-        GameObject view = new GameObject(viewName);
-        view.transform.parent = transform;
-
-        v.initialiseDataView(dobjs.DataPoints, view);
         
-        //diff x
-        //float[] dX =  dobjs.getDimension(DimensionX) - dobjs.getDimension(ToDimensionX);
-        if (DimensionX >= 0)
-        {
-            v.setDataDimension(dobjs.getDimension(DimensionX), View.VIEW_DIMENSION.X);
-            GameObject labelX = createLabel(dobjs.indexToDimension(DimensionX), view, new Vector3(0.1f, 0f, 0f));
-        }
-        if (DimensionY >= 0)
-        {
-            v.setDataDimension(dobjs.getDimension(DimensionY), View.VIEW_DIMENSION.Y);
-            GameObject labelY = createLabel(dobjs.indexToDimension(DimensionY), view, new Vector3(-0.1f, 0.1f, 0f));
-            labelY.transform.Rotate(0f, 0f, 90f);
-
-        }
-        if (DimensionZ >= 0)
-        {
-            v.setDataDimension(dobjs.getDimension(DimensionZ), View.VIEW_DIMENSION.Z);
-            GameObject labelZ = createLabel(dobjs.indexToDimension(DimensionY), view, new Vector3(-0.1f, 0.1f, 0.1f));
-            labelZ.transform.Rotate(0f, -90f, 00f);
-        }
-        if (LinkIndex < 0)
-            v.updateView(null);
-        else
-            v.updateView(dobjs.getDimension(LinkIndex));
-
-        view.AddComponent<MeshFilter>();
-        view.AddComponent<MeshRenderer>();
-
-        view.GetComponent<MeshFilter>().mesh = v.MyMesh;
-        view.GetComponent<Renderer>().material = m;
-        return view;
+    // The user either:
+    // - air tapped
+    // - said "Select"
+    // - or clicked the clicker
+    // so do something appropriate
     }
 
 
-    /// <summary>
-    /// Creates a SPLOM from data
-    /// </summary>
-    /// <param name="dobjs">the DataObject</param>
-    /// <returns>A 2D array of game objects views</returns>
-    GameObject[,] createSPLOM2D(DataObject dobjs, int linkingField, MeshTopology topology, Material material, float spacing)
-    {
-        float[] coloredData = dobjs.getDimension(7);
-        Color[] cd = Colors.mapDiscreteColor(coloredData); 
 
-        GameObject[,] SPLOM = new GameObject[dobjs.Identifiers.Length, dobjs.Identifiers.Length];
-        string[] descriptors = dobjs.Identifiers;
 
-        for (int i = 0; i < descriptors.Length; i++)
-        {
-            for (int j = 0; j < descriptors.Length; j++)
-            {
-                {
-                    View v;
-                    GameObject view = createSingle2DView(dobjs, i, j, -1, linkingField, topology, material, out v);
+
+
+
+
+    ////////////////
+    // NOT NEEDED //
+    ////////////////
+
+
+
+
+    // /// <summary>
+    // /// Creates a 2D Diff view
+    // /// </summary>
+    // /// <param name="dobjs"></param>
+    // /// <param name="DimensionX"></param>
+    // /// <param name="DimensionY"></param>
+    // /// <param name="DimensionZ"></param>
+    // /// <param name="LinkIndex"></param>
+    // /// <param name="topology"></param>
+    // /// <param name="m"></param>
+    // /// <returns></returns>
+    // GameObject create2DDiffView(DataObject dobjs, int DimensionX, int DimensionY, int DimensionZ, int ToDimensionX, int ToDimensionY, int ToDimensionZ, int LinkIndex, MeshTopology topology, Material m)
+    // {
+    //     View v = new View(topology);
+    //     string viewName = "";
+
+    //     if (DimensionX >= 0) viewName += dobjs.indexToDimension(DimensionX) + " - ";
+    //     if (DimensionY >= 0) viewName += dobjs.indexToDimension(DimensionY) + " - ";
+    //     if (DimensionZ >= 0) viewName += dobjs.indexToDimension(DimensionZ);
+
+    //     GameObject view = new GameObject(viewName);
+    //     view.transform.parent = transform;
+
+    //     v.initialiseDataView(dobjs.DataPoints, view);
+        
+    //     //diff x
+    //     //float[] dX =  dobjs.getDimension(DimensionX) - dobjs.getDimension(ToDimensionX);
+    //     if (DimensionX >= 0)
+    //     {
+    //         v.setDataDimension(dobjs.getDimension(DimensionX), View.VIEW_DIMENSION.X);
+    //         GameObject labelX = createLabel(dobjs.indexToDimension(DimensionX), view, new Vector3(0.1f, 0f, 0f));
+    //     }
+    //     if (DimensionY >= 0)
+    //     {
+    //         v.setDataDimension(dobjs.getDimension(DimensionY), View.VIEW_DIMENSION.Y);
+    //         GameObject labelY = createLabel(dobjs.indexToDimension(DimensionY), view, new Vector3(-0.1f, 0.1f, 0f));
+    //         labelY.transform.Rotate(0f, 0f, 90f);
+
+    //     }
+    //     if (DimensionZ >= 0)
+    //     {
+    //         v.setDataDimension(dobjs.getDimension(DimensionZ), View.VIEW_DIMENSION.Z);
+    //         GameObject labelZ = createLabel(dobjs.indexToDimension(DimensionY), view, new Vector3(-0.1f, 0.1f, 0.1f));
+    //         labelZ.transform.Rotate(0f, -90f, 00f);
+    //     }
+    //     if (LinkIndex < 0)
+    //         v.updateView(null);
+    //     else
+    //         v.updateView(dobjs.getDimension(LinkIndex));
+
+    //     view.AddComponent<MeshFilter>();
+    //     view.AddComponent<MeshRenderer>();
+
+    //     view.GetComponent<MeshFilter>().mesh = v.MyMesh;
+    //     view.GetComponent<Renderer>().material = m;
+    //     return view;
+    // }
+
+
+    // /// <summary>
+    // /// Creates a SPLOM from data
+    // /// </summary>
+    // /// <param name="dobjs">the DataObject</param>
+    // /// <returns>A 2D array of game objects views</returns>
+    // GameObject[,] createSPLOM2D(DataObject dobjs, int linkingField, MeshTopology topology, Material material, float spacing)
+    // {
+    //     float[] coloredData = dobjs.getDimension(7);
+    //     Color[] cd = Colors.mapDiscreteColor(coloredData); 
+
+    //     GameObject[,] SPLOM = new GameObject[dobjs.Identifiers.Length, dobjs.Identifiers.Length];
+    //     string[] descriptors = dobjs.Identifiers;
+
+    //     for (int i = 0; i < descriptors.Length; i++)
+    //     {
+    //         for (int j = 0; j < descriptors.Length; j++)
+    //         {
+    //             {
+    //                 View v;
+    //                 GameObject view = createSingle2DView(dobjs, i, j, -1, linkingField, topology, material, out v);
                     
                     
-                    //int categories = dobjs.getNumberOfCategories(coloredData);
-                    //Debug.Log("found " + categories + " in origin");
-                    //List<Color> lc = Colors.getPalette(categories);
-                    //v.mapColorCategory(coloredData, lc.ToArray());
-                    v.setColors(cd);
-                    //v.mapColorContinuous(dataObject.getDimension(0), Color.black, Color.red);
-                    view.transform.position = new Vector3((float)i * spacing, -(float)j *spacing, 0f);
-                    SPLOM[i, j] = view;
-                }
-            }
-        }
-        return SPLOM;
-    }
+    //                 //int categories = dobjs.getNumberOfCategories(coloredData);
+    //                 //Debug.Log("found " + categories + " in origin");
+    //                 //List<Color> lc = Colors.getPalette(categories);
+    //                 //v.mapColorCategory(coloredData, lc.ToArray());
+    //                 v.setColors(cd);
+    //                 //v.mapColorContinuous(dataObject.getDimension(0), Color.black, Color.red);
+    //                 view.transform.position = new Vector3((float)i * spacing, -(float)j *spacing, 0f);
+    //                 SPLOM[i, j] = view;
+    //             }
+    //         }
+    //     }
+    //     return SPLOM;
+    // }
 
-    GameObject[,] createSPLOM3D(DataObject dobjs, int linkingField, MeshTopology topology, Material material, float spacing)
-    {
-        GameObject[,] SPLOM = new GameObject[dobjs.Identifiers.Length, dobjs.Identifiers.Length];
-        string[] descriptors = dobjs.Identifiers;
-        for (int i = 0; i < descriptors.Length; i++)
-        {
-            for (int j = 0; j < descriptors.Length; j++)
-            {
-                for (int k = 0; k < descriptors.Length;k++ )
-                {
-                    if (i != j)
-                    {
-                        View v;
-                        GameObject view = createSingle2DView(dobjs, i, j, k, linkingField, topology, material, out v);
-                        view.transform.position = new Vector3((float)i * spacing, -(float)j * spacing, (float)k * spacing);                        
-                        SPLOM[i, j] = view;
-                    }
-                }
-            }
-        }
-        return SPLOM;
-    }
+    // GameObject[,] createSPLOM3D(DataObject dobjs, int linkingField, MeshTopology topology, Material material, float spacing)
+    // {
+    //     GameObject[,] SPLOM = new GameObject[dobjs.Identifiers.Length, dobjs.Identifiers.Length];
+    //     string[] descriptors = dobjs.Identifiers;
+    //     for (int i = 0; i < descriptors.Length; i++)
+    //     {
+    //         for (int j = 0; j < descriptors.Length; j++)
+    //         {
+    //             for (int k = 0; k < descriptors.Length;k++ )
+    //             {
+    //                 if (i != j)
+    //                 {
+    //                     View v;
+    //                     GameObject view = createSingle2DView(dobjs, i, j, k, linkingField, topology, material, out v);
+    //                     view.transform.position = new Vector3((float)i * spacing, -(float)j * spacing, (float)k * spacing);                        
+    //                     SPLOM[i, j] = view;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     return SPLOM;
+    // }
 
-    GameObject createLabel(string label, GameObject parent, Vector3 position)
-    {
-        GameObject TextObject = new GameObject(label);
-        TextObject.AddComponent<TextMesh>();
-        TextMesh tm = TextObject.GetComponent<TextMesh>();
-        tm.text = label;
-        TextObject.transform.localPosition = position;
-        TextObject.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
-        tm.fontSize = 108;
-        tm.color = Color.black;
-        TextObject.AddComponent<BoxCollider>();
 
-        TextObject.transform.parent = parent.transform;
 
-        return TextObject;
-    }
+    // int dimension1 = -1;
+    // int dimension2 = -1;
 
-    int dimension1 = -1;
-    int dimension2 = -1;
-
-    View snappedView;
+    // View snappedView;
     
 
 

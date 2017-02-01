@@ -45,6 +45,8 @@ Shader "Custom/Cube Shader"
 			AlphaTest Greater 0			
 		
 			CGPROGRAM
+				// Upgrade NOTE: excluded shader from DX11, Xbox360, OpenGL ES 2.0 because it uses unsized arrays
+				#pragma exclude_renderers d3d11 xbox360 gles
 				#pragma target 4.0
 				#pragma vertex VS_Main
 				#pragma fragment FS_Main
@@ -58,7 +60,7 @@ Shader "Custom/Cube Shader"
 		        struct VS_INPUT {
           		    float4 position : POSITION;
             		float4 color: COLOR;
-					float4 normal:	NORMAL;
+					float3 normal:	NORMAL;					
         		};
 				
 				struct GS_INPUT
@@ -103,8 +105,10 @@ Shader "Custom/Cube Shader"
 				float4 p2Temp; // temporary plane coordinate 2
 				float operationRange; // distance that operation affects
 				float4 selectionColor;
-				float nonSelectedOpacity; // distance that operation affects
-			
+				float nonSelectedOpacity;
+
+				int vertexCount;
+
 				float3 p0;
 				float3 p1;
 				float3 p2;
@@ -141,6 +145,7 @@ Shader "Custom/Cube Shader"
 				GS_INPUT VS_Main(VS_INPUT v)
 				{
 					GS_INPUT output = (GS_INPUT)0;
+					output.normal = v.normal;
 
 					v.position.x *= _Scale;
 					v.position.y *= _Scale;
@@ -374,6 +379,8 @@ Shader "Custom/Cube Shader"
 
 					// float halfS = ensize* _Size/500.0;
 					float halfS = _Size * .5;
+					// float halfS = _Size * .5 * p[0].normal.x;
+					
 					// p[0].pos.y *= _Scale;
 					// p[0].pos.x *= _Scale;
 					// p[0].pos.z *= _Scale;

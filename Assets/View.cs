@@ -7,7 +7,8 @@ public class View
     bool UNITY_GAME_OBJECTS_MODE = false;
     List<GameObject> visualObjects = new List<GameObject>();
 
-    public enum VIEW_DIMENSION { X, Y, Z, LINKING_FIELD };
+    public enum VIEW_DIMENSION { X, Y, Z, LINKING_FIELD, SIZE };
+
     private Mesh myMesh;
 
     public Mesh MyMesh
@@ -18,7 +19,12 @@ public class View
 
     private MeshTopology myMeshTopoolgy;
 
-    private List<Vector3> positions = new List<Vector3>();
+    public List<Vector3> positions = new List<Vector3>();
+    public List<float> sizes = new List<float>();
+
+    public List<float> getSizes(){
+        return sizes;
+    }
 
     public View(MeshTopology type)
     {
@@ -39,6 +45,7 @@ public class View
         for (int i = 0; i < numberOfPoints-1; i++)
         {
             positions.Add(new Vector3());
+            sizes.Add(1f);
 
             if (UNITY_GAME_OBJECTS_MODE)
             {
@@ -46,6 +53,7 @@ public class View
                 go.transform.parent = parent.transform;
                 visualObjects.Add(go);
             }
+
         }
 
         //Debug.Log("Created " + numberOfPoints +" data points");
@@ -56,7 +64,7 @@ public class View
         for (int i = 0; i < dat.Length; i++)
         {
             Vector3 p = positions[i];
-
+            float s = 1f;
             switch (dimension)
             {
                 case VIEW_DIMENSION.X:
@@ -68,8 +76,12 @@ public class View
                 case VIEW_DIMENSION.Z:
                     p.z = dat[i];
                     break;
+                case VIEW_DIMENSION.SIZE:
+                    s = dat[i];
+                    break;
             }
             positions[i] = p;
+            sizes[i] = s;
         }
     }
 
@@ -128,7 +140,7 @@ public class View
         }
     }
 
-    private void updateMeshPositions(float[] linkingField)
+    public void updateMeshPositions(float[] linkingField)
     {
         switch (myMeshTopoolgy)
         {
