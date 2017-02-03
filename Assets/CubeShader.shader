@@ -194,7 +194,7 @@ Shader "Custom/Cube Shader"
 						vDistance = distanceToPlane(float3(pos.x, pos.y, pos.z), p0, p1, p2);
 					}
 					else
-					if(dimensionality == 4){
+					if(dimensionality == 3){
 						vDistance = 0; // each cube will be outside of operation range
 					}
 					
